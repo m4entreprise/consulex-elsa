@@ -1,0 +1,102 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\EventSetting;
+use App\Models\FoodOption;
+use App\Models\Partner;
+use App\Models\SpectatorRegistration;
+use App\Models\CandidateRegistration;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class PublicController extends Controller
+{
+    public function home(): Response
+    {
+        $settings = EventSetting::current();
+
+        $featuredPartners = Partner::query()
+            ->where('is_featured', true)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->limit(12)
+            ->get();
+
+        return Inertia::render('public/Home', [
+            'settings' => $settings,
+            'featuredPartners' => $featuredPartners,
+        ]);
+    }
+
+    public function partners(): Response
+    {
+        $settings = EventSetting::current();
+
+        $partners = Partner::query()
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+
+        return Inertia::render('public/Partners', [
+            'settings' => $settings,
+            'partners' => $partners,
+        ]);
+    }
+
+    public function legalNotice(): Response
+    {
+        $settings = EventSetting::current();
+
+        return Inertia::render('public/LegalNotice', [
+            'settings' => $settings,
+        ]);
+    }
+
+    public function privacy(): Response
+    {
+        $settings = EventSetting::current();
+
+        return Inertia::render('public/Privacy', [
+            'settings' => $settings,
+        ]);
+    }
+
+    public function spectators(): Response
+    {
+        $settings = EventSetting::current();
+
+        $foodOptions = FoodOption::query()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('label')
+            ->get();
+
+        $seatsUsed = (int) (SpectatorRegistration::query()
+            ->selectRaw('COALESCE(SUM(1 + accompanying_count), 0) as seats_used')
+            ->value('seats_used') ?? 0);
+
+        $seatsRemaining = max(0, (int) $settings->spectator_capacity - $seatsUsed);
+
+        return Inertia::render('public/RegisterSpectators', [
+            'settings' => $settings,
+            'foodOptions' => $foodOptions,
+            'seatsUsed' => $seatsUsed,
+            'seatsRemaining' => $seatsRemaining,
+        ]);
+    }
+
+    public function candidates(): Response
+    {
+        $settings = EventSetting::current();
+
+        $candidatesUsed = (int) CandidateRegistration::query()->count();
+        $candidatesRemaining = max(0, (int) $settings->candidate_capacity - $candidatesUsed);
+
+        return Inertia::render('public/RegisterCandidates', [
+            'settings' => $settings,
+            'candidatesUsed' => $candidatesUsed,
+            'candidatesRemaining' => $candidatesRemaining,
+        ]);
+    }
+}

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import Layout from '@/layouts/Layout.vue';
-import HeroSection from '@/components/HeroSection.vue';
 import { computed, onBeforeUnmount, onMounted, ref, toRefs } from 'vue';
+import HeroSection from '@/components/HeroSection.vue';
+import PublicLayout from '@/layouts/PublicLayout.vue';
 
 type Settings = {
     event_title: string | null;
@@ -61,9 +61,7 @@ const juryPlaceholders = [
     },
 ];
 
-const partnerPlaceholders = Array.from({ length: 6 }, (_, i) => ({
-    id: i + 1,
-}));
+const partnerPlaceholders = Array.from({ length: 6 }, (_, i) => i + 1);
 
 const mainPartners = computed(() => featuredPartners.value.slice(0, 3));
 const otherPartners = computed(() => featuredPartners.value.slice(3));
@@ -100,7 +98,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <Layout title="Accueil">
+    <PublicLayout title="Accueil" :container="false">
         <HeroSection
             :date="settings.event_date"
             :location="settings.event_location"
@@ -483,25 +481,46 @@ onBeforeUnmount(() => {
                         <div class="marquee-track flex w-max items-center gap-4">
                             <div
                                 v-for="p in marqueePartners"
-                                :key="`a-${p.id}`"
-                                class="flex items-center gap-3 rounded-full border border-slate-900/10 bg-white/60 px-4 py-2"
+                                :key="typeof p === 'number' ? `a-ph-${p}` : `a-${p.id}`"
+                                class="flex items-center justify-center rounded-full border border-slate-900/10 bg-white/60 px-5 py-3"
                             >
-                                <div class="h-6 w-6 rounded-md bg-slate-900/5 ring-1 ring-slate-900/10" aria-hidden="true" />
-                                <div class="text-xs font-medium text-slate-700">
-                                    {{ 'name' in p ? p.name : 'Partenaire' }}
-                                </div>
+                                <template v-if="typeof p !== 'number' && p.logo_url">
+                                    <img
+                                        :src="p.logo_url"
+                                        :alt="p.name"
+                                        class="h-8 w-auto max-w-[140px] object-contain opacity-90"
+                                        loading="lazy"
+                                    />
+                                </template>
+                                <template v-else>
+                                    <div
+                                        class="h-8 w-28 rounded-lg bg-slate-900/5 ring-1 ring-slate-900/10 animate-pulse"
+                                        aria-hidden="true"
+                                    />
+                                    <span class="sr-only">Logo partenaire</span>
+                                </template>
                             </div>
 
                             <div
                                 v-for="p in marqueePartners"
-                                :key="`b-${p.id}`"
-                                class="flex items-center gap-3 rounded-full border border-slate-900/10 bg-white/60 px-4 py-2"
+                                :key="typeof p === 'number' ? `b-ph-${p}` : `b-${p.id}`"
+                                class="flex items-center justify-center rounded-full border border-slate-900/10 bg-white/60 px-5 py-3"
                                 aria-hidden="true"
                             >
-                                <div class="h-6 w-6 rounded-md bg-slate-900/5 ring-1 ring-slate-900/10" aria-hidden="true" />
-                                <div class="text-xs font-medium text-slate-700">
-                                    {{ 'name' in p ? p.name : 'Partenaire' }}
-                                </div>
+                                <template v-if="typeof p !== 'number' && p.logo_url">
+                                    <img
+                                        :src="p.logo_url"
+                                        :alt="p.name"
+                                        class="h-8 w-auto max-w-[140px] object-contain opacity-90"
+                                        loading="lazy"
+                                    />
+                                </template>
+                                <template v-else>
+                                    <div
+                                        class="h-8 w-28 rounded-lg bg-slate-900/5 ring-1 ring-slate-900/10 animate-pulse"
+                                        aria-hidden="true"
+                                    />
+                                </template>
                             </div>
                         </div>
                     </div>
@@ -525,7 +544,7 @@ onBeforeUnmount(() => {
                 aria-hidden="true"
             />
         </section>
-    </Layout>
+    </PublicLayout>
 </template>
 
 <style scoped>

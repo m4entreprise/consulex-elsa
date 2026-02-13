@@ -10,7 +10,6 @@ type Settings = {
     event_date: string | null;
     event_location: string | null;
     instagram_url: string | null;
-    aftermovie_url: string | null;
 };
 
 type Partner = {
@@ -19,6 +18,7 @@ type Partner = {
     url: string | null;
     description: string | null;
     logo_path: string | null;
+    logo_url?: string | null;
 };
 
 const props = defineProps<{
@@ -104,98 +104,127 @@ onBeforeUnmount(() => {
         <HeroSection
             :date="settings.event_date"
             :location="settings.event_location"
+            :theme="settings.event_theme"
+            :description="settings.event_title"
             background-image-url="/storage/hero_background_img.jpg"
         />
 
-        <section class="mt-14">
+        <section
+            class="relative overflow-hidden bg-[#f7f4ee] py-16 supports-[height:100svh]:py-16 sm:py-20 lg:py-28"
+        >
             <div class="mx-auto max-w-7xl px-4">
-                <div class="flex items-end justify-between gap-4">
-                    <div>
+                <div class="grid gap-10 lg:grid-cols-12 lg:items-end">
+                    <div class="lg:col-span-10">
+                        <p class="text-xs font-semibold tracking-[0.34em] text-slate-700">
+                            JURY
+                        </p>
+
                         <h2
-                            class="text-lg font-semibold tracking-tight text-zinc-50 sm:text-xl"
-                            style="font-family: 'Playfair Display', ui-serif, Georgia, serif;"
+                            class="mt-5 break-words text-balance leading-[0.98] tracking-[-0.02em] text-slate-950 sm:leading-[0.92]"
+                            style="font-family: 'Playfair Display', ui-serif, Georgia, serif; font-size: clamp(2.2rem, 7vw, 5.25rem);"
                         >
-                            Jury
+                            Un jury d'exception
                         </h2>
-                        <p class="mt-2 max-w-2xl text-sm text-zinc-300/75">
+
+                        <p class="mt-4 max-w-3xl text-sm font-medium leading-relaxed text-slate-700 sm:text-base">
                             Le jury sera dévoilé prochainement. Voici des emplacements temporaires pour la mise en page.
                         </p>
                     </div>
-                    <div class="hidden text-xs text-zinc-300/70 sm:block">
-                        Édition 2026
+
+                    <div class="hidden lg:col-span-2 lg:flex lg:justify-end">
+                        <div class="rounded-2xl border border-slate-900/10 bg-white/55 px-4 py-6 text-center shadow-sm">
+                            <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">Édition</div>
+                            <div class="mt-2 text-3xl font-semibold text-slate-950" style="font-family: 'Playfair Display', ui-serif, Georgia, serif;">2026</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="mt-6 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+                <div class="mt-10 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
                     <div
                         v-for="(j, idx) in juryPlaceholders"
                         :key="idx"
-                        class="group overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur transition hover:-translate-y-0.5 hover:border-amber-200/30"
+                        class="group overflow-hidden rounded-2xl border border-slate-900/10 bg-white/55 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-900/20"
                     >
                         <div class="relative aspect-[4/5] overflow-hidden">
                             <img
                                 :src="j.image"
                                 :alt="j.name"
-                                class="absolute inset-0 h-full w-full object-cover object-center opacity-70 transition duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.02] group-hover:opacity-80"
+                                class="absolute inset-0 h-full w-full object-cover object-center opacity-90 transition duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.02]"
                                 loading="lazy"
                             />
                             <div
-                                class="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_10%,rgba(251,191,36,0.20),transparent_55%),radial-gradient(90%_80%_at_20%_90%,rgba(59,130,246,0.14),transparent_60%)]"
+                                class="absolute inset-0 bg-[linear-gradient(to_top,rgba(247,244,238,0.92),rgba(247,244,238,0.30),rgba(247,244,238,0.10))]"
                                 aria-hidden="true"
                             />
-                            <div
-                                class="absolute inset-0 bg-[linear-gradient(to_top,rgba(2,6,23,0.92),rgba(2,6,23,0.35),rgba(2,6,23,0.15))]"
-                                aria-hidden="true"
-                            />
-                            <div
-                                class="absolute inset-0 opacity-0 transition duration-500 group-hover:opacity-100 bg-[radial-gradient(600px_circle_at_50%_40%,rgba(251,191,36,0.14),transparent_55%)]"
-                                aria-hidden="true"
-                            />
+                        </div>
 
-                            <div class="absolute bottom-0 left-0 right-0 p-5">
-                                <div class="text-[11px] uppercase tracking-[0.24em] text-amber-200/80">
-                                    {{ j.role }}
-                                </div>
-                                <div class="mt-2 text-base font-semibold text-zinc-50">
-                                    {{ j.name }}
-                                </div>
-                                <div class="mt-1 text-sm text-zinc-300/75">
-                                    {{ j.detail }}
-                                </div>
+                        <div class="p-5">
+                            <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">
+                                {{ j.role }}
+                            </div>
+                            <div class="mt-2 text-base font-semibold text-slate-950">
+                                {{ j.name }}
+                            </div>
+                            <div class="mt-1 text-sm text-slate-700">
+                                {{ j.detail }}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <div
+                class="pointer-events-none absolute left-6 top-6 hidden h-12 w-12 border-l border-t border-slate-900/20 lg:block"
+                aria-hidden="true"
+            />
+            <div
+                class="pointer-events-none absolute right-6 top-6 hidden h-12 w-12 border-r border-t border-slate-900/20 lg:block"
+                aria-hidden="true"
+            />
+            <div
+                class="pointer-events-none absolute left-6 bottom-6 hidden h-12 w-12 border-l border-b border-slate-900/20 lg:block"
+                aria-hidden="true"
+            />
+            <div
+                class="pointer-events-none absolute right-6 bottom-6 hidden h-12 w-12 border-r border-b border-slate-900/20 lg:block"
+                aria-hidden="true"
+            />
         </section>
 
-        <section class="mt-14">
+        <section
+            class="relative overflow-hidden bg-[#f7f4ee] py-16 supports-[height:100svh]:py-16 sm:py-20 lg:py-28"
+        >
             <div class="mx-auto max-w-7xl px-4">
-                <div class="flex items-end justify-between gap-4">
-                    <div>
+                <div class="grid gap-10 lg:grid-cols-12 lg:items-end">
+                    <div class="lg:col-span-10">
+                        <p class="text-xs font-semibold tracking-[0.34em] text-slate-700">
+                            MODALITÉS PRATIQUES
+                        </p>
+
                         <h2
-                            class="text-lg font-semibold tracking-tight text-zinc-50 sm:text-xl"
-                            style="font-family: 'Playfair Display', ui-serif, Georgia, serif;"
+                            class="mt-5 break-words text-balance leading-[0.98] tracking-[-0.02em] text-slate-950 sm:leading-[0.92]"
+                            style="font-family: 'Playfair Display', ui-serif, Georgia, serif; font-size: clamp(2.1rem, 6.5vw, 4.75rem);"
                         >
                             Modalités pratiques
                         </h2>
-                        <p class="mt-2 max-w-2xl text-sm text-zinc-300/75">
+
+                        <p class="mt-4 max-w-3xl text-sm font-medium leading-relaxed text-slate-700 sm:text-base">
                             Informations essentielles (placeholders) — horaires, accès, tenue, contacts et conditions.
                         </p>
                     </div>
-                    <div class="hidden text-xs text-zinc-300/70 sm:block">
-                        Dernières infos à J-7
+
+                    <div class="hidden lg:col-span-2 lg:flex lg:justify-end">
+                        <div class="rounded-2xl border border-slate-900/10 bg-white/55 px-4 py-6 text-center shadow-sm">
+                            <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">Dernières infos</div>
+                            <div class="mt-2 text-3xl font-semibold text-slate-950" style="font-family: 'Playfair Display', ui-serif, Georgia, serif;">J-7</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="mt-6 grid gap-4 lg:grid-cols-12">
+                <div class="mt-10 grid gap-4 lg:grid-cols-12">
                     <div class="lg:col-span-7">
-                        <div class="group relative h-full overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur">
-                            <div
-                                class="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_circle_at_30%_0%,rgba(251,191,36,0.16),transparent_55%),radial-gradient(700px_circle_at_90%_30%,rgba(59,130,246,0.12),transparent_60%)]"
-                                aria-hidden="true"
-                            />
-                            <div class="relative flex min-h-[320px] flex-col lg:min-h-0 lg:h-full">
+                        <div class="group relative h-full overflow-hidden rounded-2xl border border-slate-900/10 bg-white/55 shadow-sm">
+                            <div class="relative flex min-h-[340px] flex-col lg:min-h-0 lg:h-full">
                                 <div class="relative flex-1">
                                     <div class="absolute inset-0">
                                         <img
@@ -204,22 +233,22 @@ onBeforeUnmount(() => {
                                             :src="src"
                                             alt="Salle académique – Université de Liège"
                                             class="absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-1000 ease-in-out"
-                                            :class="modPratActive === idx ? 'opacity-70' : 'opacity-0'"
+                                            :class="modPratActive === idx ? 'opacity-90' : 'opacity-0'"
                                             loading="lazy"
                                         />
                                     </div>
                                     <div
-                                        class="absolute inset-0 bg-[linear-gradient(to_top,rgba(2,6,23,0.88),rgba(2,6,23,0.30),rgba(2,6,23,0.15))]"
+                                        class="absolute inset-0 bg-[linear-gradient(to_top,rgba(247,244,238,0.92),rgba(247,244,238,0.25),rgba(247,244,238,0.06))]"
                                         aria-hidden="true"
                                     />
                                     <div class="absolute bottom-0 left-0 right-0 p-6">
-                                        <div class="text-[11px] uppercase tracking-[0.24em] text-amber-200/80">
+                                        <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">
                                             Salle académique
                                         </div>
-                                        <div class="mt-2 text-base font-semibold text-zinc-50">
+                                        <div class="mt-2 text-base font-semibold text-slate-950">
                                             Université de Liège
                                         </div>
-                                        <div class="mt-1 text-sm text-zinc-300/75">
+                                        <div class="mt-1 text-sm text-slate-700">
                                             Galerie (fade) — {{ modPratActive + 1 }}/{{ modPratImages.length }}
                                         </div>
                                     </div>
@@ -229,19 +258,19 @@ onBeforeUnmount(() => {
                     </div>
 
                     <div class="lg:col-span-5">
-                        <div class="flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur">
-                            <div class="flex items-center justify-between gap-4 border-b border-white/10 px-5 py-4">
+                        <div class="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-900/10 bg-white/55 shadow-sm">
+                            <div class="flex items-center justify-between gap-4 border-b border-slate-900/10 px-5 py-4">
                                 <div>
-                                    <div class="text-[11px] uppercase tracking-[0.24em] text-amber-200/80">
+                                    <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">
                                         Plan
                                     </div>
-                                    <div class="mt-1 text-sm font-semibold text-zinc-50">Université de Liège (placeholder)</div>
+                                    <div class="mt-1 text-sm font-semibold text-slate-950">Université de Liège (placeholder)</div>
                                 </div>
                                 <a
                                     href="https://www.openstreetmap.org/search?query=universit%C3%A9%20de%20li%C3%A8ge"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    class="text-xs text-zinc-300/80 transition hover:text-zinc-50"
+                                    class="text-xs text-slate-600 transition hover:text-slate-950"
                                 >
                                     Ouvrir
                                 </a>
@@ -256,18 +285,18 @@ onBeforeUnmount(() => {
                                     src="https://www.openstreetmap.org/export/embed.html?bbox=5.5586%2C50.6326%2C5.5798%2C50.6452&layer=mapnik"
                                 />
                                 <div
-                                    class="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(2,6,23,0.65),transparent_55%)]"
+                                    class="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(247,244,238,0.40),transparent_65%)]"
                                     aria-hidden="true"
                                 />
                             </div>
 
-                            <div class="px-5 py-4 text-sm text-zinc-300/75">
+                            <div class="px-5 py-4 text-sm text-slate-700">
                                 <div>
-                                    <span class="font-semibold text-zinc-50">Adresse:</span>
+                                    <span class="font-semibold text-slate-950">Adresse:</span>
                                     Place du 20-Août, 4000 Liège (placeholder)
                                 </div>
                                 <div class="mt-2">
-                                    <span class="font-semibold text-zinc-50">Accès:</span>
+                                    <span class="font-semibold text-slate-950">Accès:</span>
                                     Métro / Bus / Parking (placeholder)
                                 </div>
                             </div>
@@ -275,72 +304,112 @@ onBeforeUnmount(() => {
                     </div>
                 </div>
 
-                <div class="mt-6 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+                <div class="mt-6 rounded-2xl border border-slate-900/10 bg-white/55 p-6 shadow-sm">
                     <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                            <div class="text-[11px] uppercase tracking-[0.24em] text-amber-200/80">
+                            <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">
                                 Timeline
                             </div>
-                            <div class="mt-2 text-sm text-zinc-300/75">
+                            <div class="mt-2 text-sm text-slate-700">
                                 Une lecture rapide de la soirée (placeholders).
                             </div>
                         </div>
-                        <div class="text-xs text-zinc-300/70">
+                        <div class="text-xs text-slate-600">
                             Merci d'arriver 20 minutes avant le début.
                         </div>
                     </div>
 
                     <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                        <div class="rounded-xl border border-white/10 bg-black/10 p-4">
+                        <div class="rounded-xl border border-slate-900/10 bg-white/60 p-4">
                             <div class="flex items-center justify-between gap-3">
-                                <div class="text-xs text-zinc-300/70">Ouverture</div>
-                                <div class="h-2 w-2 rounded-full bg-amber-200/80" aria-hidden="true" />
+                                <div class="text-xs text-slate-600">Ouverture</div>
+                                <div class="h-2 w-2 rounded-full bg-slate-900/15" aria-hidden="true" />
                             </div>
-                            <div class="mt-2 text-lg font-semibold text-zinc-50">19:00</div>
-                            <div class="mt-1 text-xs text-zinc-300/70">Contrôle & placement</div>
+                            <div class="mt-2 text-lg font-semibold text-slate-950">19:00</div>
+                            <div class="mt-1 text-xs text-slate-600">Contrôle & placement</div>
                         </div>
 
-                        <div class="rounded-xl border border-white/10 bg-black/10 p-4">
+                        <div class="rounded-xl border border-slate-900/10 bg-white/60 p-4">
                             <div class="flex items-center justify-between gap-3">
-                                <div class="text-xs text-zinc-300/70">Début</div>
-                                <div class="h-2 w-2 rounded-full bg-amber-200/80" aria-hidden="true" />
+                                <div class="text-xs text-slate-600">Début</div>
+                                <div class="h-2 w-2 rounded-full bg-slate-900/15" aria-hidden="true" />
                             </div>
-                            <div class="mt-2 text-lg font-semibold text-zinc-50">20:00</div>
-                            <div class="mt-1 text-xs text-zinc-300/70">Entrée des candidats</div>
+                            <div class="mt-2 text-lg font-semibold text-slate-950">20:00</div>
+                            <div class="mt-1 text-xs text-slate-600">Entrée des candidats</div>
                         </div>
 
-                        <div class="rounded-xl border border-white/10 bg-black/10 p-4">
+                        <div class="rounded-xl border border-slate-900/10 bg-white/60 p-4">
                             <div class="flex items-center justify-between gap-3">
-                                <div class="text-xs text-zinc-300/70">Entracte</div>
-                                <div class="h-2 w-2 rounded-full bg-amber-200/80" aria-hidden="true" />
+                                <div class="text-xs text-slate-600">Entracte</div>
+                                <div class="h-2 w-2 rounded-full bg-slate-900/15" aria-hidden="true" />
                             </div>
-                            <div class="mt-2 text-lg font-semibold text-zinc-50">20:45</div>
-                            <div class="mt-1 text-xs text-zinc-300/70">Pause 10–15 min</div>
+                            <div class="mt-2 text-lg font-semibold text-slate-950">20:45</div>
+                            <div class="mt-1 text-xs text-slate-600">Pause 10–15 min</div>
                         </div>
 
-                        <div class="rounded-xl border border-white/10 bg-black/10 p-4">
+                        <div class="rounded-xl border border-slate-900/10 bg-white/60 p-4">
                             <div class="flex items-center justify-between gap-3">
-                                <div class="text-xs text-zinc-300/70">Fin</div>
-                                <div class="h-2 w-2 rounded-full bg-amber-200/80" aria-hidden="true" />
+                                <div class="text-xs text-slate-600">Fin</div>
+                                <div class="h-2 w-2 rounded-full bg-slate-900/15" aria-hidden="true" />
                             </div>
-                            <div class="mt-2 text-lg font-semibold text-zinc-50">22:30</div>
-                            <div class="mt-1 text-xs text-zinc-300/70">Remise des prix</div>
+                            <div class="mt-2 text-lg font-semibold text-slate-950">22:30</div>
+                            <div class="mt-1 text-xs text-slate-600">Remise des prix</div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <div
+                class="pointer-events-none absolute left-6 top-6 hidden h-12 w-12 border-l border-t border-slate-900/20 lg:block"
+                aria-hidden="true"
+            />
+            <div
+                class="pointer-events-none absolute right-6 top-6 hidden h-12 w-12 border-r border-t border-slate-900/20 lg:block"
+                aria-hidden="true"
+            />
+            <div
+                class="pointer-events-none absolute left-6 bottom-6 hidden h-12 w-12 border-l border-b border-slate-900/20 lg:block"
+                aria-hidden="true"
+            />
+            <div
+                class="pointer-events-none absolute right-6 bottom-6 hidden h-12 w-12 border-r border-b border-slate-900/20 lg:block"
+                aria-hidden="true"
+            />
         </section>
 
-        <section class="mt-14">
+        <section
+            class="relative overflow-hidden bg-[#f7f4ee] py-16 supports-[height:100svh]:py-16 sm:py-20 lg:py-28"
+        >
             <div class="mx-auto max-w-7xl px-4">
-                <div class="flex items-end justify-between gap-4">
-                    <h2
-                        class="text-lg font-semibold tracking-tight text-zinc-50 sm:text-xl"
-                        style="font-family: 'Playfair Display', ui-serif, Georgia, serif;"
-                    >
-                        Nos partenaires
-                    </h2>
-                    <Link href="/partenaires" class="text-xs text-zinc-300/80 transition hover:text-zinc-50">
+                <div class="grid gap-10 lg:grid-cols-12 lg:items-end">
+                    <div class="lg:col-span-10">
+                        <p class="text-xs font-semibold tracking-[0.34em] text-slate-700">
+                            PARTENAIRES
+                        </p>
+
+                        <h2
+                            class="mt-5 break-words text-balance leading-[0.98] tracking-[-0.02em] text-slate-950 sm:leading-[0.92]"
+                            style="font-family: 'Playfair Display', ui-serif, Georgia, serif; font-size: clamp(2.1rem, 6.5vw, 4.75rem);"
+                        >
+                            Nos partenaires
+                        </h2>
+
+                        <p class="mt-4 max-w-3xl text-sm font-medium leading-relaxed text-slate-700 sm:text-base">
+                            Ils accompagnent le concours et contribuent à faire de cette soirée un moment d'exception.
+                        </p>
+                    </div>
+
+                    <div class="hidden lg:col-span-2 lg:flex lg:justify-end">
+                        <div class="rounded-2xl border border-slate-900/10 bg-white/55 px-4 py-6 text-center shadow-sm">
+                            <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">Réseau</div>
+                            <div class="mt-2 text-3xl font-semibold text-slate-950" style="font-family: 'Playfair Display', ui-serif, Georgia, serif;">ULiège</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-10 flex items-center justify-between gap-4">
+                    <div class="text-sm font-semibold text-slate-950">Partenaires principaux</div>
+                    <Link href="/partenaires" class="text-sm text-slate-600 transition hover:text-slate-950">
                         Voir tout
                     </Link>
                 </div>
@@ -351,33 +420,33 @@ onBeforeUnmount(() => {
                         :key="typeof p === 'number' ? `ph-${p}` : p.id"
                     >
                         <div
-                            class="group h-full rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur transition hover:-translate-y-0.5 hover:border-amber-200/30 sm:p-6"
+                            class="group h-full rounded-2xl border border-slate-900/10 bg-white/55 p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-900/20 sm:p-6"
                         >
                             <div class="flex items-center justify-between gap-4">
-                                <div class="text-[11px] uppercase tracking-[0.24em] text-amber-200/80">
+                                <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">
                                     Partenaire principal
                                 </div>
-                                <div class="text-xs text-zinc-300/70">#{{ idx + 1 }}</div>
+                                <div class="text-xs text-slate-600">#{{ idx + 1 }}</div>
                             </div>
 
-                            <div class="mt-5 flex items-center justify-center rounded-2xl border border-white/10 bg-black/10 p-6 sm:p-8">
-                                <template v-if="typeof p !== 'number' && p.logo_path">
+                            <div class="mt-5 flex items-center justify-center rounded-2xl border border-slate-900/10 bg-white/60 p-6 sm:p-8">
+                                <template v-if="typeof p !== 'number' && p.logo_url">
                                     <img
-                                        :src="p.logo_path"
+                                        :src="p.logo_url"
                                         :alt="p.name"
                                         class="max-h-20 w-auto max-w-full opacity-90 transition group-hover:opacity-100 sm:max-h-24"
                                     />
                                 </template>
                                 <template v-else>
-                                    <div class="h-14 w-40 rounded-xl bg-white/10 ring-1 ring-white/10 animate-pulse sm:h-16 sm:w-48" aria-hidden="true" />
+                                    <div class="h-14 w-40 rounded-xl bg-slate-900/5 ring-1 ring-slate-900/10 animate-pulse sm:h-16 sm:w-48" aria-hidden="true" />
                                 </template>
                             </div>
 
                             <div class="mt-5">
-                                <div class="text-sm font-semibold text-zinc-50">
+                                <div class="text-sm font-semibold text-slate-950">
                                     {{ typeof p === 'number' ? 'Nom du partenaire' : p.name }}
                                 </div>
-                                <div class="mt-2 line-clamp-2 text-sm text-zinc-300/75">
+                                <div class="mt-2 line-clamp-2 text-sm text-slate-700">
                                     {{ typeof p === 'number' ? 'Description placeholder (à venir).' : (p.description || '—') }}
                                 </div>
 
@@ -387,7 +456,7 @@ onBeforeUnmount(() => {
                                         :href="p.url"
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        class="text-sm text-zinc-300/80 transition hover:text-zinc-50"
+                                        class="text-sm text-slate-600 transition hover:text-slate-950"
                                     >
                                         Site partenaire
                                     </a>
@@ -397,12 +466,12 @@ onBeforeUnmount(() => {
                     </div>
                 </div>
 
-                <div class="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur">
-                    <div class="flex items-center justify-between gap-4 border-b border-white/10 px-5 py-4">
-                        <div class="text-[11px] uppercase tracking-[0.24em] text-amber-200/80">
+                <div class="mt-6 overflow-hidden rounded-2xl border border-slate-900/10 bg-white/55 shadow-sm">
+                    <div class="flex items-center justify-between gap-4 border-b border-slate-900/10 px-5 py-4">
+                        <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">
                             Tous les partenaires
                         </div>
-                        <div class="text-xs text-zinc-300/70">
+                        <div class="text-xs text-slate-600">
                             Banderole
                         </div>
                     </div>
@@ -415,10 +484,10 @@ onBeforeUnmount(() => {
                             <div
                                 v-for="p in marqueePartners"
                                 :key="`a-${p.id}`"
-                                class="flex items-center gap-3 rounded-full border border-white/10 bg-black/10 px-4 py-2"
+                                class="flex items-center gap-3 rounded-full border border-slate-900/10 bg-white/60 px-4 py-2"
                             >
-                                <div class="h-6 w-6 rounded-md bg-white/10 ring-1 ring-white/10" aria-hidden="true" />
-                                <div class="text-xs font-medium text-zinc-200">
+                                <div class="h-6 w-6 rounded-md bg-slate-900/5 ring-1 ring-slate-900/10" aria-hidden="true" />
+                                <div class="text-xs font-medium text-slate-700">
                                     {{ 'name' in p ? p.name : 'Partenaire' }}
                                 </div>
                             </div>
@@ -426,11 +495,11 @@ onBeforeUnmount(() => {
                             <div
                                 v-for="p in marqueePartners"
                                 :key="`b-${p.id}`"
-                                class="flex items-center gap-3 rounded-full border border-white/10 bg-black/10 px-4 py-2"
+                                class="flex items-center gap-3 rounded-full border border-slate-900/10 bg-white/60 px-4 py-2"
                                 aria-hidden="true"
                             >
-                                <div class="h-6 w-6 rounded-md bg-white/10 ring-1 ring-white/10" aria-hidden="true" />
-                                <div class="text-xs font-medium text-zinc-200">
+                                <div class="h-6 w-6 rounded-md bg-slate-900/5 ring-1 ring-slate-900/10" aria-hidden="true" />
+                                <div class="text-xs font-medium text-slate-700">
                                     {{ 'name' in p ? p.name : 'Partenaire' }}
                                 </div>
                             </div>
@@ -438,6 +507,23 @@ onBeforeUnmount(() => {
                     </div>
                 </div>
             </div>
+
+            <div
+                class="pointer-events-none absolute left-6 top-6 hidden h-12 w-12 border-l border-t border-slate-900/20 lg:block"
+                aria-hidden="true"
+            />
+            <div
+                class="pointer-events-none absolute right-6 top-6 hidden h-12 w-12 border-r border-t border-slate-900/20 lg:block"
+                aria-hidden="true"
+            />
+            <div
+                class="pointer-events-none absolute left-6 bottom-6 hidden h-12 w-12 border-l border-b border-slate-900/20 lg:block"
+                aria-hidden="true"
+            />
+            <div
+                class="pointer-events-none absolute right-6 bottom-6 hidden h-12 w-12 border-r border-b border-slate-900/20 lg:block"
+                aria-hidden="true"
+            />
         </section>
     </Layout>
 </template>

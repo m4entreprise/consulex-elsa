@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\EventSettingsController;
 use App\Http\Controllers\Admin\FoodOptionsController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\AfterMoviesController;
 use App\Http\Controllers\Admin\PartnersController;
 use App\Http\Controllers\Admin\RegistrationsController;
 use App\Http\Controllers\CandidateRegistrationsController;
@@ -28,6 +29,11 @@ Route::get('dashboard', [DashboardController::class, 'index'])
 Route::middleware(['auth', 'verified', 'can:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/settings', [EventSettingsController::class, 'edit'])->name('settings.edit');
     Route::patch('/settings', [EventSettingsController::class, 'update'])->name('settings.update');
+
+    Route::get('/after-movies', [AfterMoviesController::class, 'index'])->name('after-movies.index');
+    Route::post('/after-movies', [AfterMoviesController::class, 'store'])->name('after-movies.store');
+    Route::patch('/after-movies/{afterMovie}', [AfterMoviesController::class, 'update'])->name('after-movies.update');
+    Route::delete('/after-movies/{afterMovie}', [AfterMoviesController::class, 'destroy'])->name('after-movies.destroy');
 
     Route::get('/partners', [PartnersController::class, 'index'])->name('partners.index');
     Route::post('/partners', [PartnersController::class, 'store'])->name('partners.store');

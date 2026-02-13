@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { Handshake, LayoutGrid, SlidersHorizontal, UtensilsCrossed, Users } from 'lucide-vue-next';
+import { Clapperboard, Handshake, LayoutGrid, SlidersHorizontal, UtensilsCrossed, Users } from 'lucide-vue-next';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
@@ -27,6 +27,11 @@ const mainNavItems: NavItem[] = [
         title: 'Paramètres',
         href: '/admin/settings',
         icon: SlidersHorizontal,
+    },
+    {
+        title: 'After movies',
+        href: '/admin/after-movies',
+        icon: Clapperboard,
     },
     {
         title: 'Partenaires',

@@ -11,6 +11,7 @@ type Partner = {
     url: string | null;
     description: string | null;
     logo_path: string | null;
+    logo_url?: string | null;
 };
 
 defineProps<{
@@ -34,6 +35,9 @@ defineProps<{
                 :key="p.id"
                 class="rounded-2xl border border-border/60 bg-card p-6"
             >
+                <div v-if="p.logo_url" class="mb-4 flex items-center justify-center rounded-2xl border border-border/60 bg-background/40 p-6">
+                    <img :src="p.logo_url" :alt="p.name" class="max-h-16 w-auto max-w-full" loading="lazy" />
+                </div>
                 <div class="text-sm font-semibold">{{ p.name }}</div>
                 <div class="mt-2 text-sm text-muted-foreground">
                     {{ p.description || '—' }}

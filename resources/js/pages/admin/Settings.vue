@@ -14,7 +14,6 @@ type Settings = {
     event_date: string | null;
     event_location: string | null;
     instagram_url: string | null;
-    aftermovie_url: string | null;
     privacy_policy_url: string | null;
     rules_url: string | null;
     spectator_capacity: number;
@@ -40,6 +39,7 @@ defineProps<{ settings: Settings }>();
                 <Form
                     action="/admin/settings"
                     method="post"
+                    enctype="multipart/form-data"
                     class="grid gap-6"
                     v-slot="{ errors, processing }"
                     :options="{ preserveScroll: true }"
@@ -72,29 +72,44 @@ defineProps<{ settings: Settings }>();
                             </div>
                         </div>
 
-                        <div class="grid gap-2 sm:grid-cols-2">
-                            <div class="grid gap-2">
-                                <Label for="instagram_url">Instagram URL</Label>
-                                <Input id="instagram_url" name="instagram_url" :default-value="settings.instagram_url || ''" />
-                                <InputError :message="errors.instagram_url" />
-                            </div>
-                            <div class="grid gap-2">
-                                <Label for="aftermovie_url">Aftermovie URL</Label>
-                                <Input id="aftermovie_url" name="aftermovie_url" :default-value="settings.aftermovie_url || ''" />
-                                <InputError :message="errors.aftermovie_url" />
-                            </div>
+                        <div class="grid gap-2">
+                            <Label for="instagram_url">Instagram URL</Label>
+                            <Input id="instagram_url" name="instagram_url" :default-value="settings.instagram_url || ''" />
+                            <InputError :message="errors.instagram_url" />
                         </div>
 
                         <div class="grid gap-2 sm:grid-cols-2">
                             <div class="grid gap-2">
-                                <Label for="privacy_policy_url">Politique de confidentialité (PDF URL)</Label>
-                                <Input id="privacy_policy_url" name="privacy_policy_url" :default-value="settings.privacy_policy_url || ''" />
-                                <InputError :message="errors.privacy_policy_url" />
+                                <Label for="privacy_policy_pdf">Politique de confidentialité (PDF)</Label>
+                                <input
+                                    id="privacy_policy_pdf"
+                                    name="privacy_policy_pdf"
+                                    type="file"
+                                    accept="application/pdf"
+                                    class="block w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
+                                />
+                                <InputError :message="errors.privacy_policy_pdf" />
+                                <div v-if="settings.privacy_policy_url" class="text-xs text-muted-foreground">
+                                    <a :href="settings.privacy_policy_url" target="_blank" rel="noopener noreferrer" class="underline underline-offset-4">
+                                        Voir le PDF actuel
+                                    </a>
+                                </div>
                             </div>
                             <div class="grid gap-2">
-                                <Label for="rules_url">Règlement (PDF URL)</Label>
-                                <Input id="rules_url" name="rules_url" :default-value="settings.rules_url || ''" />
-                                <InputError :message="errors.rules_url" />
+                                <Label for="rules_pdf">Règlement (PDF)</Label>
+                                <input
+                                    id="rules_pdf"
+                                    name="rules_pdf"
+                                    type="file"
+                                    accept="application/pdf"
+                                    class="block w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
+                                />
+                                <InputError :message="errors.rules_pdf" />
+                                <div v-if="settings.rules_url" class="text-xs text-muted-foreground">
+                                    <a :href="settings.rules_url" target="_blank" rel="noopener noreferrer" class="underline underline-offset-4">
+                                        Voir le PDF actuel
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>

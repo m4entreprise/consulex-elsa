@@ -6,6 +6,8 @@ import { onMounted, onBeforeUnmount, ref } from 'vue';
 type Props = {
     date?: string | null;
     location?: string | null;
+    theme?: string | null;
+    description?: string | null;
     backgroundImageUrl?: string | null;
     backgroundImageAlt?: string;
 };
@@ -13,6 +15,8 @@ type Props = {
 const props = withDefaults(defineProps<Props>(), {
     date: null,
     location: null,
+    theme: null,
+    description: null,
     backgroundImageUrl: null,
     backgroundImageAlt: 'Fond du concours',
 });
@@ -22,6 +26,7 @@ const metaEl = ref<HTMLElement | null>(null);
 const ctasEl = ref<HTMLElement | null>(null);
 const editionEl = ref<HTMLElement | null>(null);
 const bgEl = ref<HTMLElement | null>(null);
+const sectionEl = ref<HTMLElement | null>(null);
 
 const magneticEls = ref<HTMLElement[]>([]);
 
@@ -53,7 +58,7 @@ function supportsMagnetic() {
 }
 
 function applyMagnetic(el: HTMLElement) {
-    const strength = 10;
+    const strength = 6;
 
     const onMove = (e: PointerEvent) => {
         const rect = el.getBoundingClientRect();
@@ -77,6 +82,22 @@ function applyMagnetic(el: HTMLElement) {
         el.removeEventListener('pointermove', onMove);
         el.removeEventListener('pointerleave', onLeave);
     };
+}
+
+function scrollToNextSection() {
+    if (typeof window === 'undefined') return;
+
+    const current = sectionEl.value;
+    if (!current) return;
+
+    let next = current.nextElementSibling;
+    while (next && next.tagName.toLowerCase() !== 'section') {
+        next = next.nextElementSibling;
+    }
+
+    if (next instanceof HTMLElement) {
+        next.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
 
 let cleanupMagnetic: Array<() => void> = [];
@@ -168,29 +189,30 @@ onBeforeUnmount(() => {
 
 <template>
     <section
-        class="relative min-h-[72vh] overflow-hidden supports-[height:100svh]:min-h-[72svh] sm:min-h-[78vh] sm:supports-[height:100svh]:min-h-[78svh] lg:min-h-[86vh] lg:supports-[height:100svh]:min-h-[86svh]"
+        ref="sectionEl"
+        class="relative min-h-[72vh] overflow-hidden bg-[#f7f4ee] supports-[height:100svh]:min-h-[72svh] sm:min-h-[78vh] sm:supports-[height:100svh]:min-h-[78svh] lg:min-h-[86vh] lg:supports-[height:100svh]:min-h-[86svh]"
     >
-        <div ref="bgEl" class="absolute inset-0">
+        <div ref="bgEl" class="absolute inset-0 bg-[#f7f4ee]">
             <div v-if="props.backgroundImageUrl" class="absolute inset-0">
                 <img
                     :src="props.backgroundImageUrl"
                     :alt="props.backgroundImageAlt"
-                    class="h-full w-full object-cover object-center opacity-40 sm:opacity-50 lg:opacity-55"
+                    class="h-full w-full object-cover object-center opacity-25 saturate-75 contrast-125 mix-blend-multiply sm:opacity-30 lg:opacity-36"
                     loading="lazy"
                 />
             </div>
             <div
                 v-else
-                class="absolute inset-0 bg-[radial-gradient(1200px_circle_at_20%_10%,rgba(251,191,36,0.16),transparent_55%),radial-gradient(900px_circle_at_85%_10%,rgba(59,130,246,0.12),transparent_60%)]"
+                class="absolute inset-0 bg-[radial-gradient(1200px_circle_at_18%_12%,rgba(15,23,42,0.06),transparent_58%),radial-gradient(900px_circle_at_88%_6%,rgba(180,83,9,0.08),transparent_62%)]"
                 aria-hidden="true"
             />
 
             <div
-                class="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(15,23,42,0.20),rgba(15,23,42,0.78),rgba(15,23,42,0.98))]"
+                class="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(247,244,238,0.58),rgba(247,244,238,0.78),rgba(247,244,238,0.94))]"
                 aria-hidden="true"
             />
             <div
-                class="absolute inset-0 [background:radial-gradient(900px_circle_at_50%_0%,rgba(255,255,255,0.06),transparent_58%)]"
+                class="absolute inset-0 [background:radial-gradient(900px_circle_at_50%_0%,rgba(15,23,42,0.06),transparent_62%)]"
                 aria-hidden="true"
             />
         </div>
@@ -198,32 +220,49 @@ onBeforeUnmount(() => {
         <div class="relative mx-auto max-w-7xl px-4 pt-16 pb-16 sm:pt-20 sm:pb-20 lg:pt-28 lg:pb-28">
             <div class="grid gap-10 lg:grid-cols-12 lg:items-end">
                 <div class="lg:col-span-10">
-                    <p class="text-xs font-medium tracking-[0.28em] text-zinc-300/80">
-                        CONSULEX ELSA
+                    <p class="text-xs font-semibold tracking-[0.34em] text-slate-700">
+                        ConsuLex ULiège x ELSA Liège
                     </p>
 
                     <h1
                         ref="titleEl"
-                        class="mt-5 break-words text-balance leading-[0.98] tracking-[-0.02em] text-zinc-50 sm:leading-[0.92]"
+                        class="mt-5 break-words text-balance leading-[0.98] tracking-[-0.02em] text-slate-950 sm:leading-[0.92]"
                         style="font-family: 'Playfair Display', ui-serif, Georgia, serif; font-size: clamp(2.85rem, 9.5vw, 9.5rem);"
                     >
-                        CONCOURS D'ÉLOQUENCE 2026
+                        <span class="block whitespace-nowrap break-normal">CONCOURS</span>
+                        <span class="block whitespace-nowrap break-normal">D'ÉLOQUENCE</span>
                     </h1>
+
+                    <p
+                        v-if="props.theme"
+                        class="mt-4 max-w-3xl text-sm font-semibold tracking-wide text-slate-800"
+                    >
+                        <span class="uppercase tracking-[0.22em] text-slate-600">Thème</span>
+                        <span class="px-2 text-slate-500">—</span>
+                        <span class="text-slate-900">{{ props.theme }}</span>
+                    </p>
+
+                    <p
+                        v-if="props.description"
+                        class="mt-4 max-w-3xl text-sm font-medium leading-relaxed text-slate-700 sm:text-base"
+                    >
+                        {{ props.description }}
+                    </p>
 
                     <div ref="metaEl" class="mt-8 grid gap-4 sm:grid-cols-2 lg:max-w-3xl">
                         <div
-                            class="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur"
+                            class="rounded-2xl border border-slate-900/10 bg-white/55 px-5 py-4 shadow-sm"
                         >
-                            <div class="text-[11px] uppercase tracking-[0.24em] text-zinc-300/70">Date</div>
-                            <div class="mt-2 text-sm font-medium text-zinc-50 sm:text-base">
+                            <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">Date</div>
+                            <div class="mt-2 text-sm font-semibold text-slate-950 sm:text-base">
                                 {{ props.date || 'À confirmer' }}
                             </div>
                         </div>
                         <div
-                            class="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur"
+                            class="rounded-2xl border border-slate-900/10 bg-white/55 px-5 py-4 shadow-sm"
                         >
-                            <div class="text-[11px] uppercase tracking-[0.24em] text-zinc-300/70">Lieu</div>
-                            <div class="mt-2 text-sm font-medium text-zinc-50 sm:text-base">
+                            <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">Lieu</div>
+                            <div class="mt-2 text-sm font-semibold text-slate-950 sm:text-base">
                                 {{ props.location || 'À confirmer' }}
                             </div>
                         </div>
@@ -233,14 +272,14 @@ onBeforeUnmount(() => {
                         <Link
                             :ref="setMagneticEl"
                             href="/inscription/candidats"
-                            class="group relative inline-flex h-12 w-full items-center justify-center rounded-full px-6 text-sm font-semibold tracking-wide text-slate-950 transition will-change-transform sm:w-auto"
+                            class="group relative inline-flex h-12 w-full items-center justify-center rounded-full px-6 text-sm font-semibold tracking-wide text-[#f7f4ee] transition will-change-transform sm:w-auto"
                         >
                             <span
-                                class="absolute inset-0 rounded-full bg-gradient-to-r from-amber-200 via-amber-300 to-amber-200 opacity-95 transition group-hover:opacity-100"
+                                class="absolute inset-0 rounded-full bg-slate-950 transition group-hover:bg-slate-900"
                                 aria-hidden="true"
                             />
                             <span
-                                class="absolute inset-0 rounded-full shadow-[0_0_0_1px_rgba(251,191,36,0.35),0_20px_60px_rgba(251,191,36,0.12)]"
+                                class="absolute inset-0 rounded-full shadow-[0_0_0_1px_rgba(15,23,42,0.18),0_18px_40px_rgba(15,23,42,0.14)]"
                                 aria-hidden="true"
                             />
                             <span class="relative">Candidater</span>
@@ -249,20 +288,20 @@ onBeforeUnmount(() => {
                         <Link
                             :ref="setMagneticEl"
                             href="/inscription/spectateurs"
-                            class="group relative inline-flex h-12 w-full items-center justify-center overflow-hidden rounded-full border border-amber-200/35 bg-white/0 px-6 text-sm font-semibold tracking-wide text-zinc-50 transition will-change-transform hover:border-amber-200/60 sm:w-auto"
+                            class="group relative inline-flex h-12 w-full items-center justify-center overflow-hidden rounded-full border border-slate-900/20 bg-white/0 px-6 text-sm font-semibold tracking-wide text-slate-950 transition will-change-transform hover:border-slate-900/35 sm:w-auto"
                         >
                             <span
-                                class="pointer-events-none absolute inset-0 origin-left scale-x-0 bg-gradient-to-r from-white/0 via-amber-200/10 to-white/0 transition duration-500 group-hover:scale-x-100"
+                                class="pointer-events-none absolute inset-0 origin-left scale-x-0 bg-slate-900/5 transition duration-500 group-hover:scale-x-100"
                                 aria-hidden="true"
                             />
                             <span
-                                class="pointer-events-none absolute inset-0 rounded-full shadow-[0_0_0_1px_rgba(255,255,255,0.04)]"
+                                class="pointer-events-none absolute inset-0 rounded-full shadow-[0_0_0_1px_rgba(15,23,42,0.06)]"
                                 aria-hidden="true"
                             />
                             <span class="relative">Assister</span>
                         </Link>
 
-                        <p class="text-xs leading-relaxed text-zinc-300/70 sm:ml-4">
+                        <p class="text-xs leading-relaxed text-slate-600 sm:ml-4">
                             Sélections, jury, scène — une soirée pensée comme une performance.
                         </p>
                     </div>
@@ -270,9 +309,9 @@ onBeforeUnmount(() => {
 
                 <div class="lg:col-span-2 lg:flex lg:self-start lg:justify-end lg:pt-2">
                     <div class="hidden lg:block">
-                        <div ref="editionEl" class="rounded-2xl border border-white/10 bg-white/5 px-4 py-6 text-center backdrop-blur">
-                            <div class="text-[11px] uppercase tracking-[0.24em] text-zinc-300/70">Édition</div>
-                            <div class="mt-2 text-3xl font-semibold text-zinc-50" style="font-family: 'Playfair Display', ui-serif, Georgia, serif;">2026</div>
+                        <div ref="editionEl" class="rounded-2xl border border-slate-900/10 bg-white/55 px-4 py-6 text-center shadow-sm">
+                            <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">Édition</div>
+                            <div class="mt-2 text-3xl font-semibold text-slate-950" style="font-family: 'Playfair Display', ui-serif, Georgia, serif;">2026</div>
                         </div>
                     </div>
                 </div>
@@ -280,20 +319,35 @@ onBeforeUnmount(() => {
         </div>
 
         <div
-            class="pointer-events-none absolute -left-40 top-10 h-[520px] w-[520px] rounded-full bg-amber-200/10 blur-[90px]"
+            class="pointer-events-none absolute left-6 top-6 h-12 w-12 border-l border-t border-slate-900/20"
             aria-hidden="true"
         />
         <div
-            class="pointer-events-none absolute -right-40 bottom-[-120px] h-[560px] w-[560px] rounded-full bg-blue-500/10 blur-[110px]"
+            class="pointer-events-none absolute right-6 top-6 h-12 w-12 border-r border-t border-slate-900/20"
+            aria-hidden="true"
+        />
+        <div
+            class="pointer-events-none absolute left-6 bottom-6 h-12 w-12 border-l border-b border-slate-900/20"
+            aria-hidden="true"
+        />
+        <div
+            class="pointer-events-none absolute right-6 bottom-6 h-12 w-12 border-r border-b border-slate-900/20"
             aria-hidden="true"
         />
 
-        <div class="pointer-events-none absolute bottom-7 left-1/2 hidden -translate-x-1/2 lg:block" aria-hidden="true">
-            <div class="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] uppercase tracking-[0.24em] text-zinc-200/80 backdrop-blur">
+        <button
+            type="button"
+            class="absolute bottom-7 left-1/2 hidden -translate-x-1/2 lg:block"
+            aria-label="Aller à la section suivante"
+            @click="scrollToNextSection"
+        >
+            <span
+                class="flex items-center gap-2 rounded-full border border-slate-900/10 bg-white/55 px-4 py-2 text-[11px] uppercase tracking-[0.24em] text-slate-700 shadow-sm transition hover:bg-white/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:ring-offset-2 focus-visible:ring-offset-[#f7f4ee]"
+            >
                 <span>Scroll</span>
-                <span class="inline-block h-4 w-px bg-white/15" />
+                <span class="inline-block h-4 w-px bg-slate-900/15" />
                 <span class="translate-y-[1px]">↓</span>
-            </div>
-        </div>
+            </span>
+        </button>
     </section>
 </template>

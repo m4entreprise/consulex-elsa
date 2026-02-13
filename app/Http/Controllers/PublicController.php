@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AfterMovie;
 use App\Models\EventSetting;
 use App\Models\FoodOption;
+use App\Models\JuryMember;
 use App\Models\Partner;
 use App\Models\SpectatorRegistration;
 use App\Models\CandidateRegistration;
@@ -30,10 +31,18 @@ class PublicController extends Controller
             ->limit(12)
             ->get();
 
+        $juryMembers = JuryMember::query()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->limit(10)
+            ->get();
+
         return Inertia::render('public/Home', [
             'settings' => $settings,
             'afterMovies' => $afterMovies,
             'featuredPartners' => $featuredPartners,
+            'juryMembers' => $juryMembers,
         ]);
     }
 

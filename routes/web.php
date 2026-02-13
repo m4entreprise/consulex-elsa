@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\EventSettingsController;
 use App\Http\Controllers\Admin\FoodOptionsController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\AfterMoviesController;
+use App\Http\Controllers\Admin\JuryMembersController;
 use App\Http\Controllers\Admin\PartnersController;
 use App\Http\Controllers\Admin\RegistrationsController;
 use App\Http\Controllers\CandidateRegistrationsController;
@@ -34,6 +35,11 @@ Route::middleware(['auth', 'verified', 'can:admin'])->prefix('admin')->name('adm
     Route::post('/after-movies', [AfterMoviesController::class, 'store'])->name('after-movies.store');
     Route::patch('/after-movies/{afterMovie}', [AfterMoviesController::class, 'update'])->name('after-movies.update');
     Route::delete('/after-movies/{afterMovie}', [AfterMoviesController::class, 'destroy'])->name('after-movies.destroy');
+
+    Route::get('/jury-members', [JuryMembersController::class, 'index'])->name('jury-members.index');
+    Route::post('/jury-members', [JuryMembersController::class, 'store'])->name('jury-members.store');
+    Route::patch('/jury-members/{juryMember}', [JuryMembersController::class, 'update'])->name('jury-members.update');
+    Route::delete('/jury-members/{juryMember}', [JuryMembersController::class, 'destroy'])->name('jury-members.destroy');
 
     Route::get('/partners', [PartnersController::class, 'index'])->name('partners.index');
     Route::post('/partners', [PartnersController::class, 'store'])->name('partners.store');

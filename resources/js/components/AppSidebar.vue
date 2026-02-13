@@ -34,6 +34,11 @@ const mainNavItems: NavItem[] = [
         icon: Clapperboard,
     },
     {
+        title: 'Jury',
+        href: '/admin/jury-members',
+        icon: Users,
+    },
+    {
         title: 'Partenaires',
         href: '/admin/partners',
         icon: Handshake,

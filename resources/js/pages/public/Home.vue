@@ -30,13 +30,22 @@ type AfterMovie = {
     aftermovie_url: string | null;
 };
 
+type JuryMember = {
+    id: number;
+    name: string;
+    role: string;
+    detail: string | null;
+    photo_url?: string | null;
+};
+
 const props = defineProps<{
     settings: Settings;
     afterMovies: AfterMovie[];
     featuredPartners: Partner[];
+    juryMembers: JuryMember[];
 }>();
 
-const { settings, afterMovies, featuredPartners } = toRefs(props);
+const { settings, afterMovies, featuredPartners, juryMembers } = toRefs(props);
 
 const juryPlaceholders = [
     {
@@ -70,6 +79,19 @@ const juryPlaceholders = [
         image: '/storage/jury5.jpg',
     },
 ];
+
+const juryCards = computed(() => {
+    if (juryMembers.value.length > 0) {
+        return juryMembers.value.map((m, idx) => ({
+            name: m.name,
+            role: m.role,
+            detail: m.detail ?? '',
+            image: m.photo_url || juryPlaceholders[idx % juryPlaceholders.length].image,
+        }));
+    }
+
+    return juryPlaceholders;
+});
 
 const partnerPlaceholders = Array.from({ length: 6 }, (_, i) => i + 1);
 
@@ -415,7 +437,7 @@ onBeforeUnmount(() => {
                         </h2>
 
                         <p class="mt-4 max-w-3xl text-sm font-medium leading-relaxed text-slate-700 sm:text-base">
-                            Le jury sera dévoilé prochainement. Voici des emplacements temporaires pour la mise en page.
+                            {{ juryMembers.length > 0 ? "Découvrez le jury de cette édition." : "Le jury sera dévoilé prochainement. Voici des emplacements temporaires pour la mise en page." }}
                         </p>
                     </div>
 
@@ -429,7 +451,7 @@ onBeforeUnmount(() => {
 
                 <div class="mt-10 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
                     <div
-                        v-for="(j, idx) in juryPlaceholders"
+                        v-for="(j, idx) in juryCards"
                         :key="idx"
                         class="group overflow-hidden rounded-2xl border border-slate-900/10 bg-white/55 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-900/20"
                     >

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AfterMovie;
 use App\Models\EventSetting;
 use App\Models\FoodOption;
 use App\Models\Partner;
@@ -16,6 +17,12 @@ class PublicController extends Controller
     {
         $settings = EventSetting::current();
 
+        $afterMovies = AfterMovie::query()
+            ->orderByDesc('date')
+            ->orderByDesc('id')
+            ->limit(6)
+            ->get();
+
         $featuredPartners = Partner::query()
             ->where('is_featured', true)
             ->orderBy('sort_order')
@@ -25,6 +32,7 @@ class PublicController extends Controller
 
         return Inertia::render('public/Home', [
             'settings' => $settings,
+            'afterMovies' => $afterMovies,
             'featuredPartners' => $featuredPartners,
         ]);
     }

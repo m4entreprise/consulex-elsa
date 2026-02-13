@@ -21,12 +21,22 @@ type Partner = {
     logo_url?: string | null;
 };
 
+type AfterMovie = {
+    id: number;
+    date: string;
+    location: string;
+    theme: string;
+    winner: string;
+    aftermovie_url: string | null;
+};
+
 const props = defineProps<{
     settings: Settings;
+    afterMovies: AfterMovie[];
     featuredPartners: Partner[];
 }>();
 
-const { settings, featuredPartners } = toRefs(props);
+const { settings, afterMovies, featuredPartners } = toRefs(props);
 
 const juryPlaceholders = [
     {
@@ -71,6 +81,43 @@ const marqueePartners = computed(() => {
     return partnerPlaceholders;
 });
 
+const latestAfterMovie = computed(() => afterMovies.value[0] ?? null);
+const firstAfterMovie = computed(() => afterMovies.value[afterMovies.value.length - 1] ?? null);
+const otherAfterMovies = computed(() => afterMovies.value.slice(1, 4));
+
+function formatAfterMovieDate(dateString: string) {
+    const d = new Date(dateString);
+    if (Number.isNaN(d.getTime())) return dateString;
+    return d.toLocaleDateString('fr-BE', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+function getEmbedUrl(url: string) {
+    const trimmed = url.trim();
+
+    try {
+        const parsed = new URL(trimmed);
+
+        if (parsed.hostname.includes('youtube.com')) {
+            const id = parsed.searchParams.get('v');
+            if (id) return `https://www.youtube-nocookie.com/embed/${id}`;
+        }
+
+        if (parsed.hostname === 'youtu.be') {
+            const id = parsed.pathname.replace('/', '');
+            if (id) return `https://www.youtube-nocookie.com/embed/${id}`;
+        }
+
+        if (parsed.hostname.includes('vimeo.com')) {
+            const id = parsed.pathname.split('/').filter(Boolean)[0];
+            if (id) return `https://player.vimeo.com/video/${id}`;
+        }
+    } catch {
+        return trimmed;
+    }
+
+    return trimmed;
+}
+
 const modPratImages = ['/storage/ModPrat_img.jpg', '/storage/ModPrat1_img.jpg', '/storage/ModPrat2_img.jpg'];
 const modPratActive = ref(0);
 let modPratTimer: number | null = null;
@@ -106,6 +153,249 @@ onBeforeUnmount(() => {
             :description="settings.event_title"
             background-image-url="/storage/hero_background_img.jpg"
         />
+
+        <section
+            class="relative overflow-hidden bg-[#f7f4ee] py-16 supports-[height:100svh]:py-16 sm:py-20 lg:py-28"
+        >
+            <div class="mx-auto max-w-7xl px-4">
+                <div class="grid gap-10 lg:grid-cols-12 lg:items-end">
+                    <div class="lg:col-span-10">
+                        <p class="text-xs font-semibold tracking-[0.34em] text-slate-700">
+                            AFTERMOVIE
+                        </p>
+
+                        <h2
+                            class="mt-5 break-words text-balance leading-[0.98] tracking-[-0.02em] text-slate-950 sm:leading-[0.92]"
+                            style="font-family: 'Playfair Display', ui-serif, Georgia, serif; font-size: clamp(2.1rem, 6.5vw, 4.75rem);"
+                        >
+                            Revivre les éditions
+                        </h2>
+
+                        <p class="mt-4 max-w-3xl text-sm font-medium leading-relaxed text-slate-700 sm:text-base">
+                            Les aftermovies officiels et les informations des éditions précédentes.
+                        </p>
+                    </div>
+                </div>
+
+                <template v-if="afterMovies.length === 2">
+                    <div class="mt-10 grid gap-6 lg:grid-cols-2">
+                        <div>
+                            <div class="overflow-hidden rounded-2xl border border-slate-900/10 bg-white/55 shadow-sm">
+                                <div class="border-b border-slate-900/10 px-5 py-4">
+                                    <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">
+                                        Dernière édition
+                                    </div>
+                                    <div v-if="latestAfterMovie" class="mt-2 text-base font-semibold text-slate-950">
+                                        {{ formatAfterMovieDate(latestAfterMovie.date) }} — {{ latestAfterMovie.location }}
+                                    </div>
+                                </div>
+
+                                <div class="p-5 sm:p-6">
+                                    <template v-if="latestAfterMovie && latestAfterMovie.aftermovie_url">
+                                        <div class="relative aspect-video overflow-hidden rounded-2xl border border-slate-900/10 bg-white/60">
+                                            <iframe
+                                                class="absolute inset-0 h-full w-full"
+                                                :src="getEmbedUrl(latestAfterMovie.aftermovie_url)"
+                                                title="Aftermovie"
+                                                loading="lazy"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                allowfullscreen
+                                            />
+                                        </div>
+
+                                        <div class="mt-5 grid gap-2 text-sm text-slate-700">
+                                            <div><span class="font-semibold text-slate-950">Thème:</span> {{ latestAfterMovie.theme }}</div>
+                                            <div><span class="font-semibold text-slate-950">Vainqueur:</span> {{ latestAfterMovie.winner }}</div>
+                                            <div>
+                                                <a
+                                                    :href="latestAfterMovie.aftermovie_url"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    class="text-slate-600 transition hover:text-slate-950"
+                                                >
+                                                    Ouvrir la vidéo
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <template v-else>
+                                        <div class="flex min-h-[240px] items-center justify-center rounded-2xl border border-slate-900/10 bg-white/60 p-6 text-sm text-slate-600">
+                                            Aucun aftermovie n'est encore renseigné.
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="overflow-hidden rounded-2xl border border-slate-900/10 bg-white/55 shadow-sm">
+                                <div class="border-b border-slate-900/10 px-5 py-4">
+                                    <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">
+                                        Première édition
+                                    </div>
+                                    <div v-if="firstAfterMovie" class="mt-2 text-base font-semibold text-slate-950">
+                                        {{ formatAfterMovieDate(firstAfterMovie.date) }} — {{ firstAfterMovie.location }}
+                                    </div>
+                                </div>
+
+                                <div class="p-5 sm:p-6">
+                                    <template v-if="firstAfterMovie && firstAfterMovie.aftermovie_url">
+                                        <div class="relative aspect-video overflow-hidden rounded-2xl border border-slate-900/10 bg-white/60">
+                                            <iframe
+                                                class="absolute inset-0 h-full w-full"
+                                                :src="getEmbedUrl(firstAfterMovie.aftermovie_url)"
+                                                title="Aftermovie"
+                                                loading="lazy"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                allowfullscreen
+                                            />
+                                        </div>
+
+                                        <div class="mt-5 grid gap-2 text-sm text-slate-700">
+                                            <div><span class="font-semibold text-slate-950">Thème:</span> {{ firstAfterMovie.theme }}</div>
+                                            <div><span class="font-semibold text-slate-950">Vainqueur:</span> {{ firstAfterMovie.winner }}</div>
+                                            <div>
+                                                <a
+                                                    :href="firstAfterMovie.aftermovie_url"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    class="text-slate-600 transition hover:text-slate-950"
+                                                >
+                                                    Ouvrir la vidéo
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <template v-else>
+                                        <div class="flex min-h-[240px] items-center justify-center rounded-2xl border border-slate-900/10 bg-white/60 p-6 text-sm text-slate-600">
+                                            Aucun aftermovie n'est encore renseigné.
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <template v-else>
+                    <div class="mt-10 grid gap-6 lg:grid-cols-12">
+                        <div class="lg:col-span-7">
+                            <div class="overflow-hidden rounded-2xl border border-slate-900/10 bg-white/55 shadow-sm">
+                                <div class="border-b border-slate-900/10 px-5 py-4">
+                                    <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">
+                                        Dernière édition
+                                    </div>
+                                    <div v-if="latestAfterMovie" class="mt-2 text-base font-semibold text-slate-950">
+                                        {{ formatAfterMovieDate(latestAfterMovie.date) }} — {{ latestAfterMovie.location }}
+                                    </div>
+                                    <div v-else class="mt-2 text-base font-semibold text-slate-950">
+                                        À venir
+                                    </div>
+                                </div>
+
+                                <div class="p-5 sm:p-6">
+                                    <template v-if="latestAfterMovie && latestAfterMovie.aftermovie_url">
+                                        <div class="relative aspect-video overflow-hidden rounded-2xl border border-slate-900/10 bg-white/60">
+                                            <iframe
+                                                class="absolute inset-0 h-full w-full"
+                                                :src="getEmbedUrl(latestAfterMovie.aftermovie_url)"
+                                                title="Aftermovie"
+                                                loading="lazy"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                allowfullscreen
+                                            />
+                                        </div>
+
+                                        <div class="mt-5 grid gap-2 text-sm text-slate-700">
+                                            <div><span class="font-semibold text-slate-950">Thème:</span> {{ latestAfterMovie.theme }}</div>
+                                            <div><span class="font-semibold text-slate-950">Vainqueur:</span> {{ latestAfterMovie.winner }}</div>
+                                            <div>
+                                                <a
+                                                    :href="latestAfterMovie.aftermovie_url"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    class="text-slate-600 transition hover:text-slate-950"
+                                                >
+                                                    Ouvrir la vidéo
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <template v-else>
+                                        <div class="flex min-h-[240px] items-center justify-center rounded-2xl border border-slate-900/10 bg-white/60 p-6 text-sm text-slate-600">
+                                            Aucun aftermovie n'est encore renseigné.
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-5">
+                            <div class="rounded-2xl border border-slate-900/10 bg-white/55 p-5 shadow-sm sm:p-6">
+                                <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">
+                                    Archives
+                                </div>
+
+                                <div class="mt-4 grid gap-3">
+                                    <div
+                                        v-for="m in otherAfterMovies"
+                                        :key="m.id"
+                                        class="rounded-2xl border border-slate-900/10 bg-white/60 p-4"
+                                    >
+                                        <div class="text-sm font-semibold text-slate-950">
+                                            {{ formatAfterMovieDate(m.date) }}
+                                        </div>
+                                        <div class="mt-1 text-sm text-slate-700">
+                                            {{ m.location }}
+                                        </div>
+                                        <div class="mt-2 text-xs text-slate-600">
+                                            {{ m.theme }} — {{ m.winner }}
+                                        </div>
+                                        <div v-if="m.aftermovie_url" class="mt-3">
+                                            <a
+                                                :href="m.aftermovie_url"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                class="text-sm text-slate-600 transition hover:text-slate-950"
+                                            >
+                                                Vidéo
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        v-if="afterMovies.length === 0"
+                                        class="rounded-2xl border border-slate-900/10 bg-white/60 p-4 text-sm text-slate-600"
+                                    >
+                                        Aucune édition n'est encore renseignée.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <div
+                class="pointer-events-none absolute left-6 top-6 hidden h-12 w-12 border-l border-t border-slate-900/20 lg:block"
+                aria-hidden="true"
+            />
+            <div
+                class="pointer-events-none absolute right-6 top-6 hidden h-12 w-12 border-r border-t border-slate-900/20 lg:block"
+                aria-hidden="true"
+            />
+            <div
+                class="pointer-events-none absolute left-6 bottom-6 hidden h-12 w-12 border-l border-b border-slate-900/20 lg:block"
+                aria-hidden="true"
+            />
+            <div
+                class="pointer-events-none absolute right-6 bottom-6 hidden h-12 w-12 border-r border-b border-slate-900/20 lg:block"
+                aria-hidden="true"
+            />
+        </section>
 
         <section
             class="relative overflow-hidden bg-[#f7f4ee] py-16 supports-[height:100svh]:py-16 sm:py-20 lg:py-28"

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
 import FlashMessages from '@/components/FlashMessages.vue';
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
+import AppLayout from '@/layouts/AppLayout.vue';
 
 type Settings = {
     candidate_capacity: number;

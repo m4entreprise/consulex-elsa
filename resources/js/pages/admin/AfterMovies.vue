@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { Form } from '@inertiajs/vue3';
-import AppLayout from '@/layouts/AppLayout.vue';
 import FlashMessages from '@/components/FlashMessages.vue';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/AppLayout.vue';
 
 type AfterMovie = {
     id: number;

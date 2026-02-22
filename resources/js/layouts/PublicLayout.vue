@@ -228,7 +228,7 @@ function closeMobileMenu() {
                             rel="noopener noreferrer"
                             class="m4-credit w-fit"
                         >
-                            <span class="m4-credit__label">Un site web développé et designé par</span>
+                            <span class="m4-credit__label">Un site web développé par</span>
                             <span class="m4-credit__brand">M4 Entreprise</span>
                         </a>
                     </div>

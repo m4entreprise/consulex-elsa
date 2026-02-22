@@ -5,10 +5,21 @@ import HeroSection from '@/components/HeroSection.vue';
 import PublicLayout from '@/layouts/PublicLayout.vue';
 
 type Settings = {
+    event_edition_year: number | null;
     event_title: string | null;
+    event_description: string | null;
     event_theme: string | null;
     event_date: string | null;
     event_location: string | null;
+    venue_room_name: string | null;
+    venue_room_title: string | null;
+    map_place_label: string | null;
+    map_address: string | null;
+    map_open_url: string | null;
+    map_embed_url: string | null;
+    access_text: string | null;
+    network_text: string | null;
+    timeline: any[] | null;
     instagram_url: string | null;
 };
 
@@ -35,6 +46,7 @@ type JuryMember = {
     name: string;
     role: string;
     detail: string | null;
+    description?: string | null;
     photo_url?: string | null;
 };
 
@@ -86,6 +98,7 @@ const juryCards = computed(() => {
             name: m.name,
             role: m.role,
             detail: m.detail ?? '',
+            description: m.description ?? '',
             image: m.photo_url || juryPlaceholders[idx % juryPlaceholders.length].image,
         }));
     }
@@ -104,6 +117,31 @@ const marqueePartners = computed(() => {
 });
 
 const latestAfterMovie = computed(() => afterMovies.value[0] ?? null);
+
+const activeJuryCardIndex = ref<number | null>(null);
+
+function toggleJuryCard(index: number) {
+    activeJuryCardIndex.value = activeJuryCardIndex.value === index ? null : index;
+}
+
+function closeJuryCard() {
+    activeJuryCardIndex.value = null;
+}
+
+function handleDocumentPointerDown(event: PointerEvent) {
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+
+    if (!target.closest('.js-jury-card')) {
+        closeJuryCard();
+    }
+}
+
+function handleDocumentKeyDown(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+        closeJuryCard();
+    }
+}
 const firstAfterMovie = computed(() => afterMovies.value[afterMovies.value.length - 1] ?? null);
 const otherAfterMovies = computed(() => afterMovies.value.slice(1, 4));
 
@@ -156,6 +194,8 @@ onMounted(() => {
     modPratTimer = window.setInterval(() => {
         modPratActive.value = (modPratActive.value + 1) % modPratImages.length;
     }, 5200);
+    document.addEventListener('pointerdown', handleDocumentPointerDown);
+    document.addEventListener('keydown', handleDocumentKeyDown);
 });
 
 onBeforeUnmount(() => {
@@ -163,6 +203,8 @@ onBeforeUnmount(() => {
         window.clearInterval(modPratTimer);
         modPratTimer = null;
     }
+    document.removeEventListener('pointerdown', handleDocumentPointerDown);
+    document.removeEventListener('keydown', handleDocumentKeyDown);
 });
 </script>
 
@@ -172,7 +214,8 @@ onBeforeUnmount(() => {
             :date="settings.event_date"
             :location="settings.event_location"
             :theme="settings.event_theme"
-            :description="settings.event_title"
+            :description="settings.event_description || settings.event_title"
+            :edition-year="settings.event_edition_year"
             background-image-url="/storage/hero_background_img.jpg"
         />
 
@@ -444,7 +487,7 @@ onBeforeUnmount(() => {
                     <div class="hidden lg:col-span-2 lg:flex lg:justify-end">
                         <div class="rounded-2xl border border-slate-900/10 bg-white/55 px-4 py-6 text-center shadow-sm">
                             <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">Édition</div>
-                            <div class="mt-2 text-3xl font-semibold text-slate-950" style="font-family: 'Playfair Display', ui-serif, Georgia, serif;">2026</div>
+                            <div class="mt-2 text-3xl font-semibold text-slate-950" style="font-family: 'Playfair Display', ui-serif, Georgia, serif;">{{ settings.event_edition_year ?? '' }}</div>
                         </div>
                     </div>
                 </div>
@@ -453,8 +496,16 @@ onBeforeUnmount(() => {
                     <div
                         v-for="(j, idx) in juryCards"
                         :key="idx"
-                        class="group overflow-hidden rounded-2xl border border-slate-900/10 bg-white/55 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-900/20"
+                        tabindex="0"
+                        class="js-jury-card group relative overflow-hidden rounded-2xl border border-slate-900/10 bg-white/55 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-900/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30"
+                        @click="toggleJuryCard(idx)"
+                        @keydown.enter.prevent="toggleJuryCard(idx)"
+                        @keydown.space.prevent="toggleJuryCard(idx)"
                     >
+                        <div
+                            class="transition-opacity duration-200"
+                            :class="activeJuryCardIndex === idx ? 'opacity-0' : (j.description ? 'group-hover:opacity-0' : '')"
+                        >
                         <div class="relative aspect-[4/5] overflow-hidden">
                             <img
                                 :src="j.image"
@@ -477,6 +528,27 @@ onBeforeUnmount(() => {
                             </div>
                             <div class="mt-1 text-sm text-slate-700">
                                 {{ j.detail }}
+                            </div>
+                        </div>
+                        </div>
+
+                        <div
+                            v-if="j.description"
+                            class="absolute inset-0 z-10 rounded-2xl bg-white p-5 opacity-0 transition-opacity duration-200"
+                            :class="activeJuryCardIndex === idx ? 'opacity-100' : 'pointer-events-none group-hover:opacity-100'"
+                            @click.stop="toggleJuryCard(idx)"
+                        >
+                            <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">
+                                {{ j.role }}
+                            </div>
+                            <div class="mt-2 text-base font-semibold text-slate-950">
+                                {{ j.name }}
+                            </div>
+                            <div class="mt-3 text-sm leading-relaxed text-slate-700">
+                                {{ j.description }}
+                            </div>
+                            <div class="mt-4 text-xs text-slate-500">
+                                {{ activeJuryCardIndex === idx ? 'Toucher / cliquer pour fermer' : 'Toucher / cliquer pour épingler' }}
                             </div>
                         </div>
                     </div>
@@ -519,7 +591,7 @@ onBeforeUnmount(() => {
                         </h2>
 
                         <p class="mt-4 max-w-3xl text-sm font-medium leading-relaxed text-slate-700 sm:text-base">
-                            Informations essentielles (placeholders) — horaires, accès, tenue, contacts et conditions.
+                            Informations essentielles — horaires, accès, tenue, contacts et conditions.
                         </p>
                     </div>
 
@@ -541,7 +613,7 @@ onBeforeUnmount(() => {
                                             v-for="(src, idx) in modPratImages"
                                             :key="src"
                                             :src="src"
-                                            alt="Salle académique – Université de Liège"
+                                            :alt="`${settings.venue_room_name || ''} – ${settings.venue_room_title || ''}`"
                                             class="absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-1000 ease-in-out"
                                             :class="modPratActive === idx ? 'opacity-90' : 'opacity-0'"
                                             loading="lazy"
@@ -553,10 +625,10 @@ onBeforeUnmount(() => {
                                     />
                                     <div class="absolute bottom-0 left-0 right-0 p-6">
                                         <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">
-                                            Salle académique
+                                            {{ settings.venue_room_name || '—' }}
                                         </div>
                                         <div class="mt-2 text-base font-semibold text-slate-950">
-                                            Université de Liège
+                                            {{ settings.venue_room_title || '—' }}
                                         </div>
                                         <div class="mt-1 text-sm text-slate-700">
                                             Galerie (fade) — {{ modPratActive + 1 }}/{{ modPratImages.length }}
@@ -574,10 +646,11 @@ onBeforeUnmount(() => {
                                     <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">
                                         Plan
                                     </div>
-                                    <div class="mt-1 text-sm font-semibold text-slate-950">Université de Liège (placeholder)</div>
+                                    <div class="mt-1 text-sm font-semibold text-slate-950">{{ settings.map_place_label || settings.venue_room_title || '—' }}</div>
                                 </div>
                                 <a
-                                    href="https://www.openstreetmap.org/search?query=universit%C3%A9%20de%20li%C3%A8ge"
+                                    v-if="settings.map_open_url"
+                                    :href="settings.map_open_url"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     class="text-xs text-slate-600 transition hover:text-slate-950"
@@ -588,12 +661,19 @@ onBeforeUnmount(() => {
 
                             <div class="relative min-h-[280px] flex-1">
                                 <iframe
+                                    v-if="settings.map_embed_url"
                                     class="absolute inset-0 h-full w-full"
-                                    title="Carte – Université de Liège"
+                                    :title="`Carte – ${settings.map_place_label || settings.venue_room_title || ''}`"
                                     loading="lazy"
                                     referrerpolicy="no-referrer-when-downgrade"
-                                    src="https://www.openstreetmap.org/export/embed.html?bbox=5.5586%2C50.6326%2C5.5798%2C50.6452&layer=mapnik"
+                                    :src="settings.map_embed_url"
                                 />
+                                <div
+                                    v-else
+                                    class="flex h-full min-h-[280px] items-center justify-center p-6 text-sm text-slate-600"
+                                >
+                                    Carte à venir.
+                                </div>
                                 <div
                                     class="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(247,244,238,0.40),transparent_65%)]"
                                     aria-hidden="true"
@@ -603,11 +683,11 @@ onBeforeUnmount(() => {
                             <div class="px-5 py-4 text-sm text-slate-700">
                                 <div>
                                     <span class="font-semibold text-slate-950">Adresse:</span>
-                                    Place du 20-Août, 4000 Liège (placeholder)
+                                    <span class="whitespace-pre-line">{{ settings.map_address || '—' }}</span>
                                 </div>
                                 <div class="mt-2">
                                     <span class="font-semibold text-slate-950">Accès:</span>
-                                    Métro / Bus / Parking (placeholder)
+                                    <span class="whitespace-pre-line">{{ settings.access_text || '—' }}</span>
                                 </div>
                             </div>
                         </div>
@@ -621,7 +701,7 @@ onBeforeUnmount(() => {
                                 Timeline
                             </div>
                             <div class="mt-2 text-sm text-slate-700">
-                                Une lecture rapide de la soirée (placeholders).
+                                Une lecture rapide de la soirée.
                             </div>
                         </div>
                         <div class="text-xs text-slate-600">
@@ -630,40 +710,26 @@ onBeforeUnmount(() => {
                     </div>
 
                     <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                        <div class="rounded-xl border border-slate-900/10 bg-white/60 p-4">
-                            <div class="flex items-center justify-between gap-3">
-                                <div class="text-xs text-slate-600">Ouverture</div>
-                                <div class="h-2 w-2 rounded-full bg-slate-900/15" aria-hidden="true" />
+                        <template v-if="settings.timeline && settings.timeline.length">
+                            <div
+                                v-for="(item, idx) in settings.timeline"
+                                :key="idx"
+                                class="rounded-xl border border-slate-900/10 bg-white/60 p-4"
+                            >
+                                <div class="flex items-center justify-between gap-3">
+                                    <div class="text-xs text-slate-600">{{ item.label || '—' }}</div>
+                                    <div class="h-2 w-2 rounded-full bg-slate-900/15" aria-hidden="true" />
+                                </div>
+                                <div class="mt-2 text-lg font-semibold text-slate-950">{{ item.time || '' }}</div>
+                                <div class="mt-1 text-xs text-slate-600">{{ item.description || '' }}</div>
                             </div>
-                            <div class="mt-2 text-lg font-semibold text-slate-950">19:00</div>
-                            <div class="mt-1 text-xs text-slate-600">Contrôle & placement</div>
-                        </div>
+                        </template>
 
-                        <div class="rounded-xl border border-slate-900/10 bg-white/60 p-4">
-                            <div class="flex items-center justify-between gap-3">
-                                <div class="text-xs text-slate-600">Début</div>
-                                <div class="h-2 w-2 rounded-full bg-slate-900/15" aria-hidden="true" />
-                            </div>
-                            <div class="mt-2 text-lg font-semibold text-slate-950">20:00</div>
-                            <div class="mt-1 text-xs text-slate-600">Entrée des candidats</div>
-                        </div>
-
-                        <div class="rounded-xl border border-slate-900/10 bg-white/60 p-4">
-                            <div class="flex items-center justify-between gap-3">
-                                <div class="text-xs text-slate-600">Entracte</div>
-                                <div class="h-2 w-2 rounded-full bg-slate-900/15" aria-hidden="true" />
-                            </div>
-                            <div class="mt-2 text-lg font-semibold text-slate-950">20:45</div>
-                            <div class="mt-1 text-xs text-slate-600">Pause 10–15 min</div>
-                        </div>
-
-                        <div class="rounded-xl border border-slate-900/10 bg-white/60 p-4">
-                            <div class="flex items-center justify-between gap-3">
-                                <div class="text-xs text-slate-600">Fin</div>
-                                <div class="h-2 w-2 rounded-full bg-slate-900/15" aria-hidden="true" />
-                            </div>
-                            <div class="mt-2 text-lg font-semibold text-slate-950">22:30</div>
-                            <div class="mt-1 text-xs text-slate-600">Remise des prix</div>
+                        <div
+                            v-else
+                            class="rounded-xl border border-slate-900/10 bg-white/60 p-4 text-sm text-slate-600 sm:col-span-2 lg:col-span-4"
+                        >
+                            Timeline à venir.
                         </div>
                     </div>
                 </div>
@@ -712,7 +778,7 @@ onBeforeUnmount(() => {
                     <div class="hidden lg:col-span-2 lg:flex lg:justify-end">
                         <div class="rounded-2xl border border-slate-900/10 bg-white/55 px-4 py-6 text-center shadow-sm">
                             <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">Réseau</div>
-                            <div class="mt-2 text-3xl font-semibold text-slate-950" style="font-family: 'Playfair Display', ui-serif, Georgia, serif;">ULiège</div>
+                            <div class="mt-2 text-3xl font-semibold text-slate-950" style="font-family: 'Playfair Display', ui-serif, Georgia, serif;">{{ settings.network_text || '—' }}</div>
                         </div>
                     </div>
                 </div>

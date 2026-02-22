@@ -38,16 +38,19 @@ Route::middleware(['auth', 'verified', 'can:admin'])->prefix('admin')->name('adm
 
     Route::get('/jury-members', [JuryMembersController::class, 'index'])->name('jury-members.index');
     Route::post('/jury-members', [JuryMembersController::class, 'store'])->name('jury-members.store');
+    Route::post('/jury-members/reorder', [JuryMembersController::class, 'reorder'])->name('jury-members.reorder');
     Route::patch('/jury-members/{juryMember}', [JuryMembersController::class, 'update'])->name('jury-members.update');
     Route::delete('/jury-members/{juryMember}', [JuryMembersController::class, 'destroy'])->name('jury-members.destroy');
 
     Route::get('/partners', [PartnersController::class, 'index'])->name('partners.index');
     Route::post('/partners', [PartnersController::class, 'store'])->name('partners.store');
+    Route::post('/partners/reorder', [PartnersController::class, 'reorder'])->name('partners.reorder');
     Route::patch('/partners/{partner}', [PartnersController::class, 'update'])->name('partners.update');
     Route::delete('/partners/{partner}', [PartnersController::class, 'destroy'])->name('partners.destroy');
 
     Route::get('/food-options', [FoodOptionsController::class, 'index'])->name('food-options.index');
     Route::post('/food-options', [FoodOptionsController::class, 'store'])->name('food-options.store');
+    Route::post('/food-options/reorder', [FoodOptionsController::class, 'reorder'])->name('food-options.reorder');
     Route::patch('/food-options/{foodOption}', [FoodOptionsController::class, 'update'])->name('food-options.update');
     Route::delete('/food-options/{foodOption}', [FoodOptionsController::class, 'destroy'])->name('food-options.destroy');
 

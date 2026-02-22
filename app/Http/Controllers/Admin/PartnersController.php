@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Partner;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -40,11 +42,15 @@ class PartnersController extends Controller
             $logoPath = Storage::disk('public')->putFile('partners', request()->file('logo'));
         }
 
+        $sortOrder = array_key_exists('sort_order', $validated)
+            ? (int) ($validated['sort_order'] ?? 0)
+            : ((int) (Partner::query()->max('sort_order') ?? 0) + 1);
+
         Partner::query()->create([
             'name' => $validated['name'],
             'url' => $validated['url'] ?? null,
             'description' => $validated['description'] ?? null,
-            'sort_order' => (int) ($validated['sort_order'] ?? 0),
+            'sort_order' => $sortOrder,
             'is_featured' => (bool) request()->boolean('is_featured'),
             'logo_path' => $logoPath,
         ]);
@@ -71,17 +77,48 @@ class PartnersController extends Controller
             $partner->logo_path = Storage::disk('public')->putFile('partners', request()->file('logo'));
         }
 
-        $partner->fill([
+        $fill = [
             'name' => $validated['name'],
             'url' => $validated['url'] ?? null,
             'description' => $validated['description'] ?? null,
-            'sort_order' => (int) ($validated['sort_order'] ?? 0),
             'is_featured' => (bool) request()->boolean('is_featured'),
-        ]);
+        ];
+
+        if (array_key_exists('sort_order', $validated)) {
+            $fill['sort_order'] = (int) ($validated['sort_order'] ?? 0);
+        }
+
+        $partner->fill($fill);
 
         $partner->save();
 
         return back()->with('success', 'Partenaire mis à jour.');
+    }
+
+    public function reorder(): RedirectResponse
+    {
+        $validated = request()->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['required', 'integer', 'distinct'],
+        ]);
+
+        $ids = array_values($validated['ids']);
+
+        $count = Partner::query()->whereIn('id', $ids)->count();
+
+        if ($count !== count($ids)) {
+            throw ValidationException::withMessages([
+                'ids' => "Liste invalide.",
+            ]);
+        }
+
+        DB::transaction(function () use ($ids) {
+            foreach ($ids as $index => $id) {
+                Partner::query()->whereKey($id)->update(['sort_order' => $index]);
+            }
+        });
+
+        return back()->with('success', 'Ordre mis à jour.');
     }
 
     public function destroy(Partner $partner): RedirectResponse

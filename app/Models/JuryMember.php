@@ -10,6 +10,7 @@ class JuryMember extends Model
         'name',
         'role',
         'detail',
+        'description',
         'photo_path',
         'is_active',
         'sort_order',

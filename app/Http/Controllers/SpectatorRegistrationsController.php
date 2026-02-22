@@ -18,7 +18,13 @@ class SpectatorRegistrationsController extends Controller
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['required', 'string', 'max:50'],
             'accompanying_count' => ['nullable', 'integer', 'min:0', 'max:5'],
+            'accompanying_people' => ['nullable', 'array'],
+            'accompanying_people.*.first_name' => ['nullable', 'string', 'max:255'],
+            'accompanying_people.*.last_name' => ['nullable', 'string', 'max:255'],
             'food_option_id' => ['nullable', 'integer', 'exists:food_options,id'],
+            'food_wanted' => ['nullable'],
+            'food_quantities' => ['nullable', 'array'],
+            'food_quantities.*' => ['nullable', 'integer', 'min:0', 'max:20'],
             'accepted_rgpd' => ['accepted'],
             'accepted_rules' => ['accepted'],
         ]);
@@ -32,7 +38,67 @@ class SpectatorRegistrationsController extends Controller
         $accompanying = (int) ($validated['accompanying_count'] ?? 0);
         $seatsRequested = 1 + $accompanying;
 
-        DB::transaction(function () use ($validated, $seatsRequested) {
+        $accompanyingPeople = $validated['accompanying_people'] ?? null;
+
+        if ($accompanying > 0) {
+            if (! is_array($accompanyingPeople) || count($accompanyingPeople) !== $accompanying) {
+                throw ValidationException::withMessages([
+                    'accompanying_people' => "Renseigne le nom et le prénom de chaque accompagnant.",
+                ]);
+            }
+
+            $cleanedPeople = [];
+
+            foreach (array_values($accompanyingPeople) as $index => $person) {
+                $firstName = trim((string) ($person['first_name'] ?? ''));
+                $lastName = trim((string) ($person['last_name'] ?? ''));
+
+                if ($firstName === '') {
+                    throw ValidationException::withMessages([
+                        "accompanying_people.$index.first_name" => "Prénom requis.",
+                    ]);
+                }
+
+                if ($lastName === '') {
+                    throw ValidationException::withMessages([
+                        "accompanying_people.$index.last_name" => "Nom requis.",
+                    ]);
+                }
+
+                $cleanedPeople[] = [
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                ];
+            }
+
+            $accompanyingPeople = $cleanedPeople;
+        } else {
+            $accompanyingPeople = null;
+        }
+
+        $foodWanted = (bool) request()->boolean('food_wanted');
+        $foodQuantities = $validated['food_quantities'] ?? [];
+
+        if (! $foodWanted) {
+            $foodQuantities = [];
+        }
+
+        if (! is_array($foodQuantities)) {
+            $foodQuantities = [];
+        }
+
+        $foodQuantities = collect($foodQuantities)
+            ->mapWithKeys(fn ($qty, $id) => [(int) $id => (int) $qty])
+            ->filter(fn ($qty) => $qty > 0)
+            ->all();
+
+        if ($foodWanted && count($foodQuantities) === 0 && FoodOption::query()->where('is_active', true)->exists()) {
+            throw ValidationException::withMessages([
+                'food_quantities' => 'Choisis au moins une quantité.',
+            ]);
+        }
+
+        DB::transaction(function () use ($validated, $seatsRequested, $accompanyingPeople, $foodWanted, $foodQuantities) {
             $settings = EventSetting::query()
                 ->where('key', 'default')
                 ->lockForUpdate()
@@ -56,10 +122,38 @@ class SpectatorRegistrationsController extends Controller
                 ]);
             }
 
+            $foodOptionId = $validated['food_option_id'] ?? null;
             $foodOptionLabel = null;
 
-            if (! empty($validated['food_option_id'])) {
-                $foodOptionLabel = FoodOption::query()->whereKey($validated['food_option_id'])->value('label');
+            if ($foodWanted) {
+                $ids = array_keys($foodQuantities);
+
+                if (count($ids) > 0) {
+                    $labels = FoodOption::query()
+                        ->where('is_active', true)
+                        ->whereIn('id', $ids)
+                        ->pluck('label', 'id');
+
+                    if ($labels->count() !== count($ids)) {
+                        throw ValidationException::withMessages([
+                            'food_quantities' => "Liste nourriture invalide.",
+                        ]);
+                    }
+
+                    $parts = [];
+
+                    foreach ($labels as $id => $label) {
+                        $qty = (int) ($foodQuantities[(int) $id] ?? 0);
+                        if ($qty <= 0) continue;
+                        $parts[] = trim($label).' x'.$qty;
+                    }
+
+                    $foodOptionLabel = count($parts) ? implode(', ', $parts) : null;
+                }
+
+                $foodOptionId = null;
+            } elseif (! empty($foodOptionId)) {
+                $foodOptionLabel = FoodOption::query()->whereKey($foodOptionId)->value('label');
             }
 
             SpectatorRegistration::query()->create([
@@ -67,8 +161,11 @@ class SpectatorRegistrationsController extends Controller
                 'email' => $validated['email'],
                 'phone' => $validated['phone'],
                 'accompanying_count' => (int) ($validated['accompanying_count'] ?? 0),
-                'food_option_id' => $validated['food_option_id'] ?? null,
+                'accompanying_people' => $accompanyingPeople,
+                'food_option_id' => $foodOptionId,
                 'food_option_label' => $foodOptionLabel,
+                'food_wanted' => $foodWanted,
+                'food_quantities' => $foodWanted ? $foodQuantities : null,
                 'accepted_rgpd' => true,
                 'accepted_rules' => true,
             ]);

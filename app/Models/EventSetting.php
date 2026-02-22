@@ -9,10 +9,21 @@ class EventSetting extends Model
 {
     protected $fillable = [
         'key',
+        'event_edition_year',
         'event_title',
+        'event_description',
         'event_theme',
         'event_date',
         'event_location',
+        'venue_room_name',
+        'venue_room_title',
+        'map_place_label',
+        'map_address',
+        'map_open_url',
+        'map_embed_url',
+        'access_text',
+        'network_text',
+        'timeline',
         'instagram_url',
         'privacy_policy_url',
         'rules_url',
@@ -23,10 +34,12 @@ class EventSetting extends Model
     ];
 
     protected $casts = [
+        'event_edition_year' => 'integer',
         'spectator_capacity' => 'integer',
         'candidate_capacity' => 'integer',
         'spectator_registrations_enabled' => 'boolean',
         'candidate_registrations_enabled' => 'boolean',
+        'timeline' => 'array',
     ];
 
     public static function current(): self

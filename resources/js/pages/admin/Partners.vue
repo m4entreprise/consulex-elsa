@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Form } from '@inertiajs/vue3';
+import { computed, ref, watch } from 'vue';
 import FlashMessages from '@/components/FlashMessages.vue';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
@@ -7,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
+import Draggable from 'vuedraggable';
+import { GripVertical } from 'lucide-vue-next';
 
 type Partner = {
     id: number;
@@ -18,7 +21,18 @@ type Partner = {
     sort_order: number;
 };
 
-defineProps<{ partners: Partner[] }>();
+const props = defineProps<{ partners: Partner[] }>();
+
+const partnerItems = ref<Partner[]>([...props.partners]);
+const partnerIds = computed(() => partnerItems.value.map((p) => p.id));
+
+watch(
+    () => props.partners,
+    (next) => {
+        partnerItems.value = [...next];
+    },
+    { deep: true },
+);
 </script>
 
 <template>
@@ -66,13 +80,7 @@ defineProps<{ partners: Partner[] }>();
                         </div>
 
                         <div class="grid gap-2 sm:grid-cols-2">
-                            <div class="grid gap-2">
-                                <Label for="sort_order">Ordre</Label>
-                                <Input id="sort_order" name="sort_order" type="number" min="0" default-value="0" />
-                                <InputError :message="errors.sort_order" />
-                            </div>
-
-                            <label class="mt-7 flex items-center gap-3 text-sm">
+                            <label class="flex items-center gap-3 text-sm">
                                 <input type="checkbox" name="is_featured" class="size-4" />
                                 <span>Mis en avant</span>
                             </label>
@@ -99,15 +107,41 @@ defineProps<{ partners: Partner[] }>();
                 </div>
 
                 <div class="rounded-xl border border-border/60 bg-card p-6">
-                    <div class="text-sm font-medium">Liste</div>
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="text-sm font-medium">Liste</div>
 
-                    <div class="mt-4 grid gap-3">
-                        <div
-                            v-for="p in partners"
-                            :key="p.id"
-                            class="rounded-xl border border-border/60 bg-background/40 p-4"
+                        <Form
+                            action="/admin/partners/reorder"
+                            method="post"
+                            class="flex items-center gap-2"
+                            v-slot="{ processing }"
+                            :options="{ preserveScroll: true }"
                         >
-                            <div class="grid gap-3">
+                            <input v-for="id in partnerIds" :key="id" type="hidden" name="ids[]" :value="id" />
+                            <Button type="submit" variant="outline" size="sm" :disabled="processing || partnerItems.length === 0">
+                                Enregistrer l'ordre
+                            </Button>
+                        </Form>
+                    </div>
+
+                    <Draggable
+                        v-if="partnerItems.length"
+                        v-model="partnerItems"
+                        item-key="id"
+                        handle=".drag-handle"
+                        class="mt-4 grid gap-3"
+                    >
+                        <template #item="{ element: p }">
+                            <div class="rounded-xl border border-border/60 bg-background/40 p-4">
+                                <div class="grid gap-3">
+                                    <button
+                                        type="button"
+                                        class="drag-handle inline-flex w-fit items-center gap-2 rounded-md border border-border/60 bg-background px-2 py-1 text-xs text-muted-foreground"
+                                    >
+                                        <GripVertical class="h-4 w-4" />
+                                        Glisser pour réordonner
+                                    </button>
+
                                 <Form
                                     :action="`/admin/partners/${p.id}`"
                                     method="post"
@@ -142,13 +176,7 @@ defineProps<{ partners: Partner[] }>();
                                     </div>
 
                                     <div class="grid gap-2 sm:grid-cols-2">
-                                        <div class="grid gap-2">
-                                            <Label :for="`sort_${p.id}`">Ordre</Label>
-                                            <Input :id="`sort_${p.id}`" name="sort_order" type="number" min="0" :default-value="p.sort_order" />
-                                            <InputError :message="errors.sort_order" />
-                                        </div>
-
-                                        <label class="mt-7 flex items-center gap-3 text-sm">
+                                        <label class="flex items-center gap-3 text-sm">
                                             <input type="checkbox" name="is_featured" class="size-4" :checked="p.is_featured" />
                                             <span>Mis en avant</span>
                                         </label>
@@ -183,9 +211,11 @@ defineProps<{ partners: Partner[] }>();
                             </div>
                         </div>
 
-                        <div v-if="partners.length === 0" class="text-sm text-muted-foreground">
-                            Aucun partenaire.
-                        </div>
+                        </template>
+                    </Draggable>
+
+                    <div v-else class="mt-4 text-sm text-muted-foreground">
+                        Aucun partenaire.
                     </div>
                 </div>
             </div>

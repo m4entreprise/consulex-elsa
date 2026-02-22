@@ -9,6 +9,7 @@ use App\Models\JuryMember;
 use App\Models\Partner;
 use App\Models\SpectatorRegistration;
 use App\Models\CandidateRegistration;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -61,18 +62,26 @@ class PublicController extends Controller
         ]);
     }
 
-    public function legalNotice(): Response
+    public function legalNotice(): RedirectResponse|Response
     {
         $settings = EventSetting::current();
+
+        if (! empty($settings->rules_url)) {
+            return redirect()->to($settings->rules_url);
+        }
 
         return Inertia::render('public/LegalNotice', [
             'settings' => $settings,
         ]);
     }
 
-    public function privacy(): Response
+    public function privacy(): RedirectResponse|Response
     {
         $settings = EventSetting::current();
+
+        if (! empty($settings->privacy_policy_url)) {
+            return redirect()->to($settings->privacy_policy_url);
+        }
 
         return Inertia::render('public/Privacy', [
             'settings' => $settings,

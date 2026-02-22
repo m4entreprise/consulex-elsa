@@ -11,14 +11,20 @@ class SpectatorRegistration extends Model
         'email',
         'phone',
         'accompanying_count',
+        'accompanying_people',
         'food_option_id',
         'food_option_label',
+        'food_wanted',
+        'food_quantities',
         'accepted_rgpd',
         'accepted_rules',
     ];
 
     protected $casts = [
         'accompanying_count' => 'integer',
+        'accompanying_people' => 'array',
+        'food_wanted' => 'boolean',
+        'food_quantities' => 'array',
         'accepted_rgpd' => 'boolean',
         'accepted_rules' => 'boolean',
     ];

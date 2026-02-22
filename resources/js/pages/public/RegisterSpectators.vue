@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Form, Link } from '@inertiajs/vue3';
+import { computed, ref, watch } from 'vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,12 +23,91 @@ type FoodOption = {
     label: string;
 };
 
-defineProps<{
+const props = defineProps<{
     settings: Settings;
     foodOptions: FoodOption[];
     seatsUsed: number;
     seatsRemaining: number;
 }>();
+
+const accompanyingCount = ref('0');
+const accompanyingCountNumber = computed(() => {
+    const parsed = Number.parseInt(accompanyingCount.value, 10);
+    if (Number.isNaN(parsed)) return 0;
+    return Math.max(0, Math.min(5, parsed));
+});
+
+type AccompanyingPerson = {
+    first_name: string;
+    last_name: string;
+};
+
+const accompanyingPeople = ref<AccompanyingPerson[]>([]);
+
+watch(
+    accompanyingCountNumber,
+    (count) => {
+        const next: AccompanyingPerson[] = [];
+
+        for (let i = 0; i < count; i += 1) {
+            next.push(
+                accompanyingPeople.value[i] ?? {
+                    first_name: '',
+                    last_name: '',
+                },
+            );
+        }
+
+        accompanyingPeople.value = next;
+    },
+    { immediate: true },
+);
+
+const foodWantedChoice = ref<'0' | '1'>('0');
+
+const foodQuantities = ref<Record<number, number>>({});
+
+watch(
+    () => props.foodOptions,
+    (options) => {
+        const next: Record<number, number> = { ...foodQuantities.value };
+
+        for (const o of options) {
+            if (typeof next[o.id] !== 'number') {
+                next[o.id] = 0;
+            }
+        }
+
+        foodQuantities.value = next;
+    },
+    { immediate: true, deep: true },
+);
+
+watch(foodWantedChoice, (choice) => {
+    if (choice !== '1') {
+        const next: Record<number, number> = { ...foodQuantities.value };
+        for (const key of Object.keys(next)) {
+            next[Number.parseInt(key, 10)] = 0;
+        }
+        foodQuantities.value = next;
+    }
+});
+
+function incrementFood(id: number) {
+    const current = foodQuantities.value[id] ?? 0;
+    foodQuantities.value = {
+        ...foodQuantities.value,
+        [id]: Math.min(20, current + 1),
+    };
+}
+
+function decrementFood(id: number) {
+    const current = foodQuantities.value[id] ?? 0;
+    foodQuantities.value = {
+        ...foodQuantities.value,
+        [id]: Math.max(0, current - 1),
+    };
+}
 </script>
 
 <template>
@@ -151,25 +231,134 @@ defineProps<{
                                                 type="number"
                                                 min="0"
                                                 max="5"
-                                                default-value="0"
+                                                v-model="accompanyingCount"
                                                 class="h-11 rounded-xl border-slate-900/15 bg-white/60 px-4 text-slate-950 shadow-sm focus-visible:border-slate-900/25 focus-visible:ring-slate-900/15"
                                             />
                                             <InputError :message="errors.accompanying_count" />
+                                            <InputError :message="errors.accompanying_people" />
                                         </div>
 
                                         <div class="grid gap-2">
-                                            <Label for="food_option_id" class="text-sm font-semibold text-slate-950">Nourriture</Label>
-                                            <select
-                                                id="food_option_id"
-                                                name="food_option_id"
-                                                class="h-11 w-full rounded-xl border border-slate-900/15 bg-white/60 px-4 text-sm text-slate-950 shadow-sm transition focus:outline-none focus-visible:border-slate-900/25 focus-visible:ring-2 focus-visible:ring-slate-900/15"
+                                            <div class="text-sm font-semibold text-slate-950">Nourriture</div>
+
+                                            <div class="grid gap-2">
+                                                <label class="flex items-center gap-2 text-sm text-slate-700">
+                                                    <input
+                                                        type="radio"
+                                                        name="food_wanted"
+                                                        value="0"
+                                                        v-model="foodWantedChoice"
+                                                        class="size-4 rounded border-slate-900/20 bg-white/60 text-slate-950"
+                                                    />
+                                                    <span>Non</span>
+                                                </label>
+
+                                                <label class="flex items-center gap-2 text-sm text-slate-700">
+                                                    <input
+                                                        type="radio"
+                                                        name="food_wanted"
+                                                        value="1"
+                                                        v-model="foodWantedChoice"
+                                                        class="size-4 rounded border-slate-900/20 bg-white/60 text-slate-950"
+                                                    />
+                                                    <span>Oui</span>
+                                                </label>
+                                            </div>
+
+                                            <InputError :message="errors.food_wanted" />
+                                            <InputError :message="errors.food_quantities" />
+                                        </div>
+                                    </div>
+
+                                    <div v-if="accompanyingCountNumber > 0" class="grid gap-4 rounded-2xl border border-slate-900/10 bg-white/50 p-4">
+                                        <div>
+                                            <div class="text-sm font-semibold text-slate-950">Accompagnants</div>
+                                            <div class="mt-1 text-sm text-slate-600">
+                                                Renseigne le nom et le prénom de chaque accompagnant.
+                                            </div>
+                                        </div>
+
+                                        <div class="grid gap-4">
+                                            <div
+                                                v-for="(p, idx) in accompanyingPeople"
+                                                :key="idx"
+                                                class="grid gap-3 rounded-xl border border-slate-900/10 bg-white/40 p-4"
                                             >
-                                                <option value="">Aucune</option>
-                                                <option v-for="o in foodOptions" :key="o.id" :value="o.id">
+                                                <div class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-600">
+                                                    Accompagnant {{ idx + 1 }}
+                                                </div>
+
+                                                <div class="grid gap-3 sm:grid-cols-2">
+                                                    <div class="grid gap-2">
+                                                        <Label :for="`acc_first_${idx}`" class="text-sm font-semibold text-slate-950">Prénom</Label>
+                                                        <Input
+                                                            :id="`acc_first_${idx}`"
+                                                            :name="`accompanying_people[${idx}][first_name]`"
+                                                            v-model="p.first_name"
+                                                            required
+                                                            class="h-11 rounded-xl border-slate-900/15 bg-white/60 px-4 text-slate-950 shadow-sm focus-visible:border-slate-900/25 focus-visible:ring-slate-900/15"
+                                                        />
+                                                        <InputError :message="errors[`accompanying_people.${idx}.first_name`]" />
+                                                    </div>
+
+                                                    <div class="grid gap-2">
+                                                        <Label :for="`acc_last_${idx}`" class="text-sm font-semibold text-slate-950">Nom</Label>
+                                                        <Input
+                                                            :id="`acc_last_${idx}`"
+                                                            :name="`accompanying_people[${idx}][last_name]`"
+                                                            v-model="p.last_name"
+                                                            required
+                                                            class="h-11 rounded-xl border-slate-900/15 bg-white/60 px-4 text-slate-950 shadow-sm focus-visible:border-slate-900/25 focus-visible:ring-slate-900/15"
+                                                        />
+                                                        <InputError :message="errors[`accompanying_people.${idx}.last_name`]" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div v-if="foodWantedChoice === '1'" class="grid gap-4 rounded-2xl border border-slate-900/10 bg-white/50 p-4">
+                                        <div>
+                                            <div class="text-sm font-semibold text-slate-950">Choix nourriture</div>
+                                            <div class="mt-1 text-sm text-slate-600">
+                                                Indique les quantités pour chaque option.
+                                            </div>
+                                        </div>
+
+                                        <div class="grid gap-3">
+                                            <div
+                                                v-for="o in foodOptions"
+                                                :key="o.id"
+                                                class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-900/10 bg-white/40 px-4 py-3"
+                                            >
+                                                <div class="min-w-[12rem] text-sm font-medium text-slate-950">
                                                     {{ o.label }}
-                                                </option>
-                                            </select>
-                                            <InputError :message="errors.food_option_id" />
+                                                </div>
+
+                                                <div class="flex items-center gap-2">
+                                                    <button
+                                                        type="button"
+                                                        class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-900/15 bg-white/70 text-slate-950 shadow-sm hover:bg-white"
+                                                        @click="decrementFood(o.id)"
+                                                    >
+                                                        -
+                                                    </button>
+
+                                                    <div class="w-10 text-center text-sm font-semibold tabular-nums text-slate-950">
+                                                        {{ foodQuantities[o.id] ?? 0 }}
+                                                    </div>
+
+                                                    <button
+                                                        type="button"
+                                                        class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-900/15 bg-white/70 text-slate-950 shadow-sm hover:bg-white"
+                                                        @click="incrementFood(o.id)"
+                                                    >
+                                                        +
+                                                    </button>
+                                                </div>
+
+                                                <input type="hidden" :name="`food_quantities[${o.id}]`" :value="foodQuantities[o.id] ?? 0" />
+                                            </div>
                                         </div>
                                     </div>
 

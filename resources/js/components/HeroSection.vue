@@ -8,6 +8,7 @@ type Props = {
     location?: string | null;
     theme?: string | null;
     description?: string | null;
+    editionYear?: number | null;
     backgroundImageUrl?: string | null;
     backgroundImageAlt?: string;
 };
@@ -17,6 +18,7 @@ const props = withDefaults(defineProps<Props>(), {
     location: null,
     theme: null,
     description: null,
+    editionYear: null,
     backgroundImageUrl: null,
     backgroundImageAlt: 'Fond du concours',
 });
@@ -311,7 +313,7 @@ onBeforeUnmount(() => {
                     <div class="hidden lg:block">
                         <div ref="editionEl" class="rounded-2xl border border-slate-900/10 bg-white/55 px-4 py-6 text-center shadow-sm">
                             <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">Édition</div>
-                            <div class="mt-2 text-3xl font-semibold text-slate-950" style="font-family: 'Playfair Display', ui-serif, Georgia, serif;">2026</div>
+                            <div class="mt-2 text-3xl font-semibold text-slate-950" style="font-family: 'Playfair Display', ui-serif, Georgia, serif;">{{ props.editionYear ?? '' }}</div>
                         </div>
                     </div>
                 </div>

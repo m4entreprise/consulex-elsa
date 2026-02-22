@@ -304,7 +304,7 @@ onBeforeUnmount(() => {
                         </Link>
 
                         <p class="text-xs leading-relaxed text-slate-600 sm:ml-4">
-                            Sélections, jury, scène — une soirée pensée comme une performance.
+                            Concours d'éloquence de l'Université de Liège
                         </p>
                     </div>
                 </div>

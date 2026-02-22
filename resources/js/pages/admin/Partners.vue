@@ -101,9 +101,7 @@ watch(
                         <Button type="submit" :disabled="processing">Créer</Button>
                     </Form>
 
-                    <div class="mt-3 text-xs text-muted-foreground">
-                        Pense à exécuter <code>php artisan storage:link</code> pour servir les logos.
-                    </div>
+                    
                 </div>
 
                 <div class="rounded-xl border border-border/60 bg-card p-6">

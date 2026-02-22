@@ -11,6 +11,8 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import Draggable from 'vuedraggable';
 import { GripVertical } from 'lucide-vue-next';
 
+const activeTab = ref('event');
+
 type Settings = {
     event_edition_year: number | null;
     event_title: string | null;
@@ -30,6 +32,9 @@ type Settings = {
     instagram_url: string | null;
     privacy_policy_url: string | null;
     rules_url: string | null;
+    footer_brand: string | null;
+    footer_description: string | null;
+    footer_copyright: string | null;
     spectator_capacity: number;
     candidate_capacity: number;
     spectator_registrations_enabled: boolean;
@@ -87,16 +92,16 @@ const timelineJson = computed(() => {
 </script>
 
 <template>
-    <AppLayout :breadcrumbs="[{ title: 'Admin', href: '/dashboard' }, { title: 'Paramètres', href: '/admin/settings' }]">
+    <AppLayout :breadcrumbs="[{ title: 'Admin', href: '/dashboard' }, { title: 'Site web', href: '#' }, { title: 'Général' }]">
         <div class="p-4">
             <FlashMessages class="mb-4" />
 
             <Heading
-                title="Paramètres de l'événement"
-                description="Contenu public + quotas modifiables (spectateurs/candidats)."
+                title="Général"
+                description="Paramètres de l'événement : contenu public + quotas modifiables (spectateurs/candidats)."
             />
 
-            <div class="max-w-3xl">
+            <div class="max-w-4xl">
                 <Form
                     action="/admin/settings"
                     method="post"
@@ -106,6 +111,62 @@ const timelineJson = computed(() => {
                     :options="{ preserveScroll: true }"
                 >
                     <input type="hidden" name="_method" value="PATCH" />
+
+                    <div class="w-full">
+                        <div class="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground w-full">
+                            <button
+                                type="button"
+                                @click="activeTab = 'event'"
+                                :class="[
+                                    'inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 flex-1',
+                                    activeTab === 'event' ? 'bg-background text-foreground shadow-sm' : ''
+                                ]"
+                            >
+                                Événement
+                            </button>
+                            <button
+                                type="button"
+                                @click="activeTab = 'venue'"
+                                :class="[
+                                    'inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 flex-1',
+                                    activeTab === 'venue' ? 'bg-background text-foreground shadow-sm' : ''
+                                ]"
+                            >
+                                Lieu & Accès
+                            </button>
+                            <button
+                                type="button"
+                                @click="activeTab = 'timeline'"
+                                :class="[
+                                    'inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 flex-1',
+                                    activeTab === 'timeline' ? 'bg-background text-foreground shadow-sm' : ''
+                                ]"
+                            >
+                                Programme
+                            </button>
+                            <button
+                                type="button"
+                                @click="activeTab = 'registrations'"
+                                :class="[
+                                    'inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 flex-1',
+                                    activeTab === 'registrations' ? 'bg-background text-foreground shadow-sm' : ''
+                                ]"
+                            >
+                                Inscriptions
+                            </button>
+                            <button
+                                type="button"
+                                @click="activeTab = 'misc'"
+                                :class="[
+                                    'inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 flex-1',
+                                    activeTab === 'misc' ? 'bg-background text-foreground shadow-sm' : ''
+                                ]"
+                            >
+                                Divers
+                            </button>
+                        </div>
+
+                        <div v-show="activeTab === 'event'" class="mt-6">
 
                     <div class="grid gap-3 rounded-xl border border-border/60 bg-card p-6">
                         <div class="grid gap-2">
@@ -156,6 +217,11 @@ const timelineJson = computed(() => {
                                 <InputError :message="errors.event_location" />
                             </div>
                         </div>
+                        </div>
+                        </div>
+
+                        <div v-show="activeTab === 'venue'" class="mt-6">
+                        <div class="grid gap-3 rounded-xl border border-border/60 bg-card p-6">
 
                         <div class="grid gap-2 sm:grid-cols-2">
                             <div class="grid gap-2">
@@ -215,6 +281,11 @@ const timelineJson = computed(() => {
                             <Input id="network_text" name="network_text" :default-value="settings.network_text || ''" />
                             <InputError :message="errors.network_text" />
                         </div>
+                        </div>
+                        </div>
+
+                        <div v-show="activeTab === 'timeline'" class="mt-6">
+                        <div class="grid gap-3 rounded-xl border border-border/60 bg-card p-6">
 
                         <div class="grid gap-2">
                             <Label for="timeline_json">Timeline (JSON)</Label>
@@ -276,11 +347,78 @@ const timelineJson = computed(() => {
 
                             <InputError :message="errors.timeline_json" />
                         </div>
+                        </div>
+                        </div>
+
+                        <div v-show="activeTab === 'registrations'" class="mt-6">
+                        <div class="grid gap-3 rounded-xl border border-border/60 bg-card p-6">
+                        <div class="grid gap-2 sm:grid-cols-2">
+                            <div class="grid gap-2">
+                                <Label for="spectator_capacity">Jauge spectateurs</Label>
+                                <Input id="spectator_capacity" name="spectator_capacity" type="number" min="0" :default-value="settings.spectator_capacity" />
+                                <InputError :message="errors.spectator_capacity" />
+                            </div>
+                            <div class="grid gap-2">
+                                <Label for="candidate_capacity">Quota candidats</Label>
+                                <Input id="candidate_capacity" name="candidate_capacity" type="number" min="0" :default-value="settings.candidate_capacity" />
+                                <InputError :message="errors.candidate_capacity" />
+                            </div>
+                        </div>
+
+                        <div class="grid gap-3">
+                            <label class="flex items-center gap-3 text-sm">
+                                <input
+                                    type="checkbox"
+                                    name="spectator_registrations_enabled"
+                                    class="size-4"
+                                    :checked="settings.spectator_registrations_enabled"
+                                />
+                                <span>Inscriptions spectateurs ouvertes</span>
+                            </label>
+
+                            <label class="flex items-center gap-3 text-sm">
+                                <input
+                                    type="checkbox"
+                                    name="candidate_registrations_enabled"
+                                    class="size-4"
+                                    :checked="settings.candidate_registrations_enabled"
+                                />
+                                <span>Inscriptions candidats ouvertes</span>
+                            </label>
+                        </div>
+                        </div>
+                        </div>
+
+                        <div v-show="activeTab === 'misc'" class="mt-6">
+                        <div class="grid gap-3 rounded-xl border border-border/60 bg-card p-6">
 
                         <div class="grid gap-2">
                             <Label for="instagram_url">Instagram URL</Label>
                             <Input id="instagram_url" name="instagram_url" :default-value="settings.instagram_url || ''" />
                             <InputError :message="errors.instagram_url" />
+                        </div>
+
+                        <div class="grid gap-2">
+                            <Label for="footer_brand">Texte footer (ligne 1)</Label>
+                            <Input id="footer_brand" name="footer_brand" :default-value="settings.footer_brand || ''" />
+                            <InputError :message="errors.footer_brand" />
+                        </div>
+
+                        <div class="grid gap-2">
+                            <Label for="footer_description">Description footer</Label>
+                            <textarea
+                                id="footer_description"
+                                name="footer_description"
+                                rows="3"
+                                class="block w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs"
+                            >{{ settings.footer_description || '' }}</textarea>
+                            <InputError :message="errors.footer_description" />
+                        </div>
+
+                        <div class="grid gap-2">
+                            <Label for="footer_copyright">Texte footer (ligne 2)</Label>
+                            <Input id="footer_copyright" name="footer_copyright" :default-value="settings.footer_copyright || ''" />
+                            <InputError :message="errors.footer_copyright" />
                         </div>
 
                         <div class="grid gap-2 sm:grid-cols-2">
@@ -317,46 +455,11 @@ const timelineJson = computed(() => {
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="grid gap-3 rounded-xl border border-border/60 bg-card p-6">
-                        <div class="grid gap-2 sm:grid-cols-2">
-                            <div class="grid gap-2">
-                                <Label for="spectator_capacity">Jauge spectateurs</Label>
-                                <Input id="spectator_capacity" name="spectator_capacity" type="number" min="0" :default-value="settings.spectator_capacity" />
-                                <InputError :message="errors.spectator_capacity" />
-                            </div>
-                            <div class="grid gap-2">
-                                <Label for="candidate_capacity">Quota candidats</Label>
-                                <Input id="candidate_capacity" name="candidate_capacity" type="number" min="0" :default-value="settings.candidate_capacity" />
-                                <InputError :message="errors.candidate_capacity" />
-                            </div>
                         </div>
-
-                        <div class="grid gap-3">
-                            <label class="flex items-center gap-3 text-sm">
-                                <input
-                                    type="checkbox"
-                                    name="spectator_registrations_enabled"
-                                    class="size-4"
-                                    :checked="settings.spectator_registrations_enabled"
-                                />
-                                <span>Inscriptions spectateurs ouvertes</span>
-                            </label>
-
-                            <label class="flex items-center gap-3 text-sm">
-                                <input
-                                    type="checkbox"
-                                    name="candidate_registrations_enabled"
-                                    class="size-4"
-                                    :checked="settings.candidate_registrations_enabled"
-                                />
-                                <span>Inscriptions candidats ouvertes</span>
-                            </label>
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-3 pt-4">
                         <Button type="submit" :disabled="processing">Enregistrer</Button>
                         <span class="text-sm text-muted-foreground">/admin/settings</span>
                     </div>

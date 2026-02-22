@@ -3,6 +3,7 @@ import { Link } from '@inertiajs/vue3';
 import { computed, onBeforeUnmount, onMounted, ref, toRefs } from 'vue';
 import HeroSection from '@/components/HeroSection.vue';
 import PublicLayout from '@/layouts/PublicLayout.vue';
+import * as LucideIcons from 'lucide-vue-next';
 
 type Settings = {
     event_edition_year: number | null;
@@ -50,44 +51,58 @@ type JuryMember = {
     photo_url?: string | null;
 };
 
+type PracticalModality = {
+    id: number;
+    icon_name: string;
+    title: string;
+    description: string | null;
+};
+
 const props = defineProps<{
     settings: Settings;
     afterMovies: AfterMovie[];
     featuredPartners: Partner[];
+    partners: Partner[];
     juryMembers: JuryMember[];
+    practicalModalities: PracticalModality[];
 }>();
 
-const { settings, afterMovies, featuredPartners, juryMembers } = toRefs(props);
+const { settings, afterMovies, featuredPartners, partners, juryMembers, practicalModalities } = toRefs(props);
 
 const juryPlaceholders = [
     {
         name: 'Nom du jury',
         role: 'Présidence du jury',
         detail: 'Avocat / Professeur / Orateur',
+        description: '',
         image: '/storage/jury1.jpeg',
     },
     {
         name: 'Nom du jury',
         role: 'Membre du jury',
         detail: 'Éloquence / Art oratoire',
+        description: '',
         image: '/storage/jury2.jpg',
     },
     {
         name: 'Nom du jury',
         role: 'Membre du jury',
         detail: 'Droit / Rhétorique',
+        description: '',
         image: '/storage/jury3.jpg',
     },
     {
         name: 'Nom du jury',
         role: 'Membre du jury',
         detail: 'Scène / Performance',
+        description: '',
         image: '/storage/jury4.jpg',
     },
     {
         name: 'Nom du jury',
         role: 'Membre du jury',
         detail: 'Culture / Expression',
+        description: '',
         image: '/storage/jury5.jpg',
     },
 ];
@@ -109,10 +124,8 @@ const juryCards = computed(() => {
 const partnerPlaceholders = Array.from({ length: 6 }, (_, i) => i + 1);
 
 const mainPartners = computed(() => featuredPartners.value.slice(0, 3));
-const otherPartners = computed(() => featuredPartners.value.slice(3));
 const marqueePartners = computed(() => {
-    if (otherPartners.value.length > 0) return otherPartners.value;
-    if (featuredPartners.value.length > 0) return featuredPartners.value;
+    if (partners.value.length > 0) return partners.value;
     return partnerPlaceholders;
 });
 
@@ -142,6 +155,15 @@ function handleDocumentKeyDown(event: KeyboardEvent) {
         closeJuryCard();
     }
 }
+
+function getIconComponent(iconName: string) {
+    if (!iconName) return LucideIcons.HelpCircle;
+    const IconComponent = (LucideIcons as any)[iconName];
+    if (!IconComponent || typeof IconComponent !== 'function') return LucideIcons.HelpCircle;
+    if (IconComponent === (LucideIcons as any).Icon) return LucideIcons.HelpCircle;
+    return IconComponent;
+}
+
 const firstAfterMovie = computed(() => afterMovies.value[afterMovies.value.length - 1] ?? null);
 const otherAfterMovies = computed(() => afterMovies.value.slice(1, 4));
 
@@ -733,6 +755,37 @@ onBeforeUnmount(() => {
                         </div>
                     </div>
                 </div>
+
+                <div v-if="practicalModalities.length" class="mx-auto mt-16 max-w-7xl px-6 lg:px-8">
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                            <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">
+                                Modalités pratiques
+                            </div>
+                            <div class="mt-2 text-sm text-slate-700">
+                                Informations utiles pour votre venue.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <div
+                            v-for="modality in practicalModalities"
+                            :key="modality.id"
+                            class="rounded-xl border border-slate-900/10 bg-white/60 p-6"
+                        >
+                            <div class="flex items-start gap-4">
+                                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-slate-100">
+                                    <component :is="getIconComponent(modality.icon_name)" class="h-6 w-6 text-slate-700" />
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="break-words font-semibold leading-snug text-slate-900">{{ modality.title }}</h3>
+                                    <p class="mt-1 break-words whitespace-pre-line text-sm leading-relaxed text-slate-600 [overflow-wrap:anywhere]">{{ modality.description }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div
@@ -860,7 +913,7 @@ onBeforeUnmount(() => {
                             <div
                                 v-for="p in marqueePartners"
                                 :key="typeof p === 'number' ? `a-ph-${p}` : `a-${p.id}`"
-                                class="flex items-center justify-center rounded-full border border-slate-900/10 bg-white/60 px-5 py-3"
+                                class="flex flex-none shrink-0 items-center justify-center rounded-full border border-slate-900/10 bg-white/60 px-5 py-3"
                             >
                                 <template v-if="typeof p !== 'number' && p.logo_url">
                                     <img
@@ -882,7 +935,7 @@ onBeforeUnmount(() => {
                             <div
                                 v-for="p in marqueePartners"
                                 :key="typeof p === 'number' ? `b-ph-${p}` : `b-${p.id}`"
-                                class="flex items-center justify-center rounded-full border border-slate-900/10 bg-white/60 px-5 py-3"
+                                class="flex flex-none shrink-0 items-center justify-center rounded-full border border-slate-900/10 bg-white/60 px-5 py-3"
                                 aria-hidden="true"
                             >
                                 <template v-if="typeof p !== 'number' && p.logo_url">
@@ -933,6 +986,8 @@ onBeforeUnmount(() => {
 
 .marquee-track {
     animation: marquee 28s linear infinite;
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 @keyframes marquee {

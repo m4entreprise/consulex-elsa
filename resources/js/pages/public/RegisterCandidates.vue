@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Form, Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,13 +12,56 @@ type Settings = {
     candidate_registrations_enabled: boolean;
     privacy_policy_url: string | null;
     rules_url: string | null;
+    event_title?: string | null;
+    event_description?: string | null;
+    event_theme?: string | null;
+    event_date?: string | null;
+    event_location?: string | null;
+    venue_room_name?: string | null;
+    venue_room_title?: string | null;
+    map_place_label?: string | null;
+    map_address?: string | null;
+    map_open_url?: string | null;
+    access_text?: string | null;
+    network_text?: string | null;
+    timeline?: Array<{ time?: string; label?: string; description?: string }> | null;
 };
 
-defineProps<{
+const props = defineProps<{
     settings: Settings;
     candidatesUsed: number;
     candidatesRemaining: number;
 }>();
+
+const isClosed = computed(() => !props.settings.candidate_registrations_enabled || props.candidatesRemaining === 0);
+
+const faculties = [
+    'Faculté de Philosophie et Lettres',
+    'Faculté de Droit, Science politique et Criminologie',
+    'Faculté des Sciences',
+    'Faculté de Médecine',
+    'Faculté des Sciences Appliquées',
+    'Faculté de Médecine Vétérinaire',
+    "Faculté de Psychologie, Logopédie et Sciences de l'Education",
+    'HEC Liège - Ecole de Gestion',
+    'Faculté des Sciences Sociales',
+    'Faculté de Gembloux Agro-Bio Tech',
+    "Faculté d'Architecture",
+];
+
+const studyYears = ['BAC 1', 'BAC 2', 'BAC 3', 'MASTER 0', 'MASTER 1', 'MASTER 2', 'MASTER 3', 'MASTER DE SPE', 'DOCTORAT', 'ERASMUS'];
+
+const timelineSteps = computed(() => {
+    if (!Array.isArray(props.settings.timeline)) return [];
+
+    return props.settings.timeline
+        .map((s) => ({
+            time: typeof s?.time === 'string' ? s.time : '',
+            label: typeof s?.label === 'string' ? s.label : '',
+            description: typeof s?.description === 'string' ? s.description : '',
+        }))
+        .filter((s) => s.time || s.label || s.description);
+});
 </script>
 
 <template>
@@ -33,45 +77,142 @@ defineProps<{
             </div>
 
             <div class="relative mx-auto max-w-7xl px-4">
-                <div class="mb-10">
-                    <p class="text-xs font-semibold tracking-[0.34em] text-slate-700">
-                        ConsuLex ULiège x ELSA Liège
-                    </p>
-                    <h1
-                        class="mt-5 text-balance leading-tight tracking-[-0.02em] text-slate-950"
-                        style="font-family: 'Playfair Display', ui-serif, Georgia, serif; font-size: clamp(2.25rem, 5vw, 4.25rem);"
-                    >
-                        Inscription candidats
-                    </h1>
-                    <p class="mt-3 max-w-2xl text-sm font-medium leading-relaxed text-slate-700 sm:text-base">
-                        Dépose ton texte (PDF) et ta photo.
-                    </p>
-                </div>
-
-                <div class="grid gap-8 lg:grid-cols-12 lg:items-start">
+                <div class="grid gap-10 lg:grid-cols-12 lg:items-start">
                     <div class="lg:col-span-5">
-                        <div class="rounded-2xl border border-slate-900/10 bg-white/55 p-6 shadow-sm">
-                            <div class="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-600">
-                                Quota
-                            </div>
-                            <div class="mt-3 text-2xl font-semibold text-slate-950">
-                                {{ candidatesRemaining }} restantes
-                            </div>
-                            <div class="mt-1 text-sm text-slate-600">
-                                {{ candidatesUsed }} inscrits / {{ settings.candidate_capacity }}
+                        <div class="inline-flex items-center rounded-full border border-slate-900/10 bg-white/55 px-4 py-2 text-[11px] font-semibold tracking-[0.34em] text-slate-700 shadow-sm">
+                            INSCRIPTION
+                        </div>
+
+                        <h1
+                            class="mt-5 break-words text-balance leading-[0.98] tracking-[-0.02em] text-slate-950 sm:leading-[0.92]"
+                            style="font-family: 'Playfair Display', ui-serif, Georgia, serif; font-size: clamp(2.2rem, 7vw, 4.75rem);"
+                        >
+                            Candidats
+                        </h1>
+
+                        <p class="mt-4 max-w-xl text-sm font-medium leading-relaxed text-slate-700 sm:text-base">
+                            Dépose ton texte (PDF) et ta preuve d'inscription à l'ULG (PDF).
+                        </p>
+
+                        <div class="mt-8 grid gap-4">
+                            <div class="rounded-2xl border border-slate-900/10 bg-white/55 p-5 shadow-sm">
+                                <div class="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-600">Événement</div>
+
+                                <div class="mt-3 grid gap-3">
+                                    <div v-if="settings.event_theme" class="text-base font-semibold text-slate-950">
+                                        {{ settings.event_theme }}
+                                    </div>
+                                    <div v-if="settings.event_title" class="text-sm text-slate-700">
+                                        {{ settings.event_title }}
+                                    </div>
+                                    <div v-if="settings.event_description" class="text-sm leading-relaxed text-slate-600">
+                                        {{ settings.event_description }}
+                                    </div>
+
+                                    <div class="grid gap-2 text-sm text-slate-700">
+                                        <div v-if="settings.event_date" class="flex items-start justify-between gap-3">
+                                            <div class="text-slate-600">Date</div>
+                                            <div class="font-medium text-slate-950">{{ settings.event_date }}</div>
+                                        </div>
+                                        <div v-if="settings.event_location" class="flex items-start justify-between gap-3">
+                                            <div class="text-slate-600">Lieu</div>
+                                            <div class="font-medium text-slate-950">{{ settings.event_location }}</div>
+                                        </div>
+                                        <div v-if="settings.venue_room_title || settings.venue_room_name" class="flex items-start justify-between gap-3">
+                                            <div class="text-slate-600">Salle</div>
+                                            <div class="text-right font-medium text-slate-950">
+                                                <div v-if="settings.venue_room_title">{{ settings.venue_room_title }}</div>
+                                                <div v-if="settings.venue_room_name" class="text-sm font-normal text-slate-700">{{ settings.venue_room_name }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div
-                                v-if="!settings.candidate_registrations_enabled || candidatesRemaining === 0"
-                                class="mt-4 text-sm font-medium text-red-700"
-                            >
-                                Les inscriptions candidats sont clôturées.
+                            <div v-if="settings.map_address || settings.map_open_url || settings.access_text || settings.network_text" class="rounded-2xl border border-slate-900/10 bg-white/55 p-5 shadow-sm">
+                                <div class="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-600">Infos pratiques</div>
+
+                                <div class="mt-3 grid gap-4">
+                                    <div v-if="settings.map_address || settings.map_place_label" class="grid gap-1">
+                                        <div class="text-sm font-semibold text-slate-950">
+                                            {{ settings.map_place_label || 'Adresse' }}
+                                        </div>
+                                        <div v-if="settings.map_address" class="text-sm whitespace-pre-line text-slate-700">
+                                            {{ settings.map_address }}
+                                        </div>
+                                        <a
+                                            v-if="settings.map_open_url"
+                                            :href="settings.map_open_url"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="mt-2 inline-flex w-fit items-center rounded-full border border-slate-900/15 bg-white/70 px-4 py-2 text-xs font-semibold text-slate-900 shadow-sm hover:bg-white"
+                                        >
+                                            Ouvrir sur la carte
+                                        </a>
+                                    </div>
+
+                                    <div v-if="settings.access_text" class="grid gap-1">
+                                        <div class="text-sm font-semibold text-slate-950">Accès</div>
+                                        <div class="text-sm whitespace-pre-line leading-relaxed text-slate-700">
+                                            {{ settings.access_text }}
+                                        </div>
+                                    </div>
+
+                                    <div v-if="settings.network_text" class="grid gap-1">
+                                        <div class="text-sm font-semibold text-slate-950">Réseau</div>
+                                        <div class="text-sm leading-relaxed text-slate-700">
+                                            {{ settings.network_text }}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+
+                            <div v-if="timelineSteps.length" class="rounded-2xl border border-slate-900/10 bg-white/55 p-5 shadow-sm">
+                                <div class="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-600">Timeline</div>
+
+                                <div class="mt-3 grid gap-3">
+                                    <div v-for="(s, idx) in timelineSteps" :key="idx" class="rounded-xl border border-slate-900/10 bg-white/45 p-4">
+                                        <div class="flex flex-wrap items-baseline justify-between gap-2">
+                                            <div class="text-sm font-semibold text-slate-950">
+                                                {{ s.label || `Étape ${idx + 1}` }}
+                                            </div>
+                                            <div v-if="s.time" class="text-xs font-semibold tracking-wide text-slate-600">
+                                                {{ s.time }}
+                                            </div>
+                                        </div>
+                                        <div v-if="s.description" class="mt-2 text-sm whitespace-pre-line leading-relaxed text-slate-700">
+                                            {{ s.description }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 text-sm text-slate-600">
+                            Tu veux juste assister ?
+                            <Link href="/inscription/spectateurs" class="text-slate-700 underline underline-offset-4 hover:text-slate-950">
+                                Inscription spectateurs
+                            </Link>
                         </div>
                     </div>
 
                     <div class="lg:col-span-7">
-                        <div class="rounded-2xl border border-slate-900/10 bg-white/55 p-6 shadow-sm md:p-8">
+                        <div class="overflow-hidden rounded-2xl border border-slate-900/10 bg-white/55 shadow-sm">
+                            <div class="border-b border-slate-900/10 px-5 py-4">
+                                <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">Formulaire</div>
+                                <div class="mt-2 text-base font-semibold text-slate-950">
+                                    Informations
+                                </div>
+                            </div>
+
+                            <div class="p-5 sm:p-6">
+                                <div
+                                    v-if="isClosed"
+                                    class="mb-5 rounded-2xl border border-red-900/10 bg-red-500/10 p-4 text-sm text-red-900"
+                                >
+                                    Les inscriptions candidats sont clôturées.
+                                </div>
+
                             <Form
                                 action="/inscription/candidats"
                                 method="post"
@@ -80,15 +221,27 @@ defineProps<{
                                 v-slot="{ errors, processing }"
                                 :options="{ preserveScroll: true }"
                             >
-                                <div class="grid gap-2">
-                                    <Label for="full_name" class="text-slate-900">Nom et prénom</Label>
-                                    <Input
-                                        id="full_name"
-                                        name="full_name"
-                                        required
-                                        class="border-slate-900/10 bg-white/55 text-slate-900 placeholder:text-slate-500 shadow-sm"
-                                    />
-                                    <InputError :message="errors.full_name" />
+                                <div class="grid gap-4 sm:grid-cols-2">
+                                    <div class="grid gap-2">
+                                        <Label for="first_name" class="text-sm font-semibold text-slate-950">Prénom</Label>
+                                        <Input
+                                            id="first_name"
+                                            name="first_name"
+                                            required
+                                            class="border-slate-900/10 bg-white/55 text-slate-900 placeholder:text-slate-500 shadow-sm"
+                                        />
+                                        <InputError :message="errors.first_name" />
+                                    </div>
+                                    <div class="grid gap-2">
+                                        <Label for="last_name" class="text-sm font-semibold text-slate-950">Nom</Label>
+                                        <Input
+                                            id="last_name"
+                                            name="last_name"
+                                            required
+                                            class="border-slate-900/10 bg-white/55 text-slate-900 placeholder:text-slate-500 shadow-sm"
+                                        />
+                                        <InputError :message="errors.last_name" />
+                                    </div>
                                 </div>
 
                                 <div class="grid gap-2 sm:grid-cols-2">
@@ -115,19 +268,42 @@ defineProps<{
                                     </div>
                                 </div>
 
-                                <div class="grid gap-2">
-                                    <Label for="faculty" class="text-slate-900">Faculté / établissement</Label>
-                                    <Input
-                                        id="faculty"
-                                        name="faculty"
-                                        required
-                                        class="border-slate-900/10 bg-white/55 text-slate-900 placeholder:text-slate-500 shadow-sm"
-                                    />
-                                    <InputError :message="errors.faculty" />
+                                <div class="grid gap-4 sm:grid-cols-2">
+                                    <div class="grid gap-2">
+                                        <Label for="faculty" class="text-sm font-semibold text-slate-950">Faculté</Label>
+                                        <select
+                                            id="faculty"
+                                            name="faculty"
+                                            required
+                                            class="h-11 w-full rounded-xl border border-slate-900/15 bg-white/60 px-4 text-sm text-slate-950 shadow-sm transition focus:outline-none focus-visible:border-slate-900/25 focus-visible:ring-2 focus-visible:ring-slate-900/15"
+                                        >
+                                            <option value="" disabled selected>Sélectionner…</option>
+                                            <option v-for="f in faculties" :key="f" :value="f">
+                                                {{ f }}
+                                            </option>
+                                        </select>
+                                        <InputError :message="errors.faculty" />
+                                    </div>
+
+                                    <div class="grid gap-2">
+                                        <Label for="study_year" class="text-sm font-semibold text-slate-950">Année</Label>
+                                        <select
+                                            id="study_year"
+                                            name="study_year"
+                                            required
+                                            class="h-11 w-full rounded-xl border border-slate-900/15 bg-white/60 px-4 text-sm text-slate-950 shadow-sm transition focus:outline-none focus-visible:border-slate-900/25 focus-visible:ring-2 focus-visible:ring-slate-900/15"
+                                        >
+                                            <option value="" disabled selected>Sélectionner…</option>
+                                            <option v-for="y in studyYears" :key="y" :value="y">
+                                                {{ y }}
+                                            </option>
+                                        </select>
+                                        <InputError :message="errors.study_year" />
+                                    </div>
                                 </div>
 
                                 <div class="grid gap-2">
-                                    <Label for="text_pdf" class="text-slate-900">Texte (PDF)</Label>
+                                    <Label for="text_pdf" class="text-sm font-semibold text-slate-950">Texte (PDF)</Label>
                                     <input
                                         id="text_pdf"
                                         name="text_pdf"
@@ -140,16 +316,16 @@ defineProps<{
                                 </div>
 
                                 <div class="grid gap-2">
-                                    <Label for="photo" class="text-slate-900">Photo</Label>
+                                    <Label for="proof_pdf" class="text-sm font-semibold text-slate-950">Preuve d'inscription à l'ULG (PDF)</Label>
                                     <input
-                                        id="photo"
-                                        name="photo"
+                                        id="proof_pdf"
+                                        name="proof_pdf"
                                         type="file"
-                                        accept="image/*"
+                                        accept="application/pdf"
                                         required
                                         class="block w-full rounded-md border border-slate-900/10 bg-white/55 px-3 py-2 text-sm text-slate-900 shadow-sm file:mr-4 file:rounded-md file:border-0 file:bg-slate-950 file:px-3 file:py-2 file:text-xs file:font-semibold file:tracking-wide file:text-[#f7f4ee]"
                                     />
-                                    <InputError :message="errors.photo" />
+                                    <InputError :message="errors.proof_pdf" />
                                 </div>
 
                                 <div class="grid gap-3">
@@ -201,7 +377,7 @@ defineProps<{
                                 <Button
                                     type="submit"
                                     class="group relative mt-2 h-12 w-full justify-center rounded-full px-6 text-sm font-semibold tracking-wide text-[#f7f4ee]"
-                                    :disabled="processing || !settings.candidate_registrations_enabled || candidatesRemaining === 0"
+                                    :disabled="processing || isClosed"
                                 >
                                     <span
                                         class="absolute inset-0 rounded-full bg-slate-950 transition group-hover:bg-slate-900"
@@ -213,14 +389,8 @@ defineProps<{
                                     />
                                     <span class="relative">Valider la candidature</span>
                                 </Button>
-
-                                <div class="text-sm text-slate-700">
-                                    Tu veux juste assister ?
-                                    <Link href="/inscription/spectateurs" class="underline underline-offset-4">
-                                        Inscription spectateurs
-                                    </Link>
-                                </div>
                             </Form>
+                            </div>
                         </div>
                     </div>
                 </div>

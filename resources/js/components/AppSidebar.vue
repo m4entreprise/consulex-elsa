@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { Clapperboard, Handshake, LayoutGrid, SlidersHorizontal, UtensilsCrossed, Users } from 'lucide-vue-next';
+import { ClipboardList, Globe, LayoutGrid, UtensilsCrossed, UserCheck } from 'lucide-vue-next';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
@@ -24,24 +24,30 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Paramètres',
-        href: '/admin/settings',
-        icon: SlidersHorizontal,
-    },
-    {
-        title: 'After movies',
-        href: '/admin/after-movies',
-        icon: Clapperboard,
-    },
-    {
-        title: 'Jury',
-        href: '/admin/jury-members',
-        icon: Users,
-    },
-    {
-        title: 'Partenaires',
-        href: '/admin/partners',
-        icon: Handshake,
+        title: 'Site web',
+        icon: Globe,
+        items: [
+            {
+                title: 'Général',
+                href: '/admin/settings',
+            },
+            {
+                title: 'Modalités pratiques',
+                href: '/admin/practical-modalities',
+            },
+            {
+                title: 'After movies',
+                href: '/admin/after-movies',
+            },
+            {
+                title: 'Jury',
+                href: '/admin/jury-members',
+            },
+            {
+                title: 'Partenaires',
+                href: '/admin/partners',
+            },
+        ],
     },
     {
         title: 'Nourriture',
@@ -49,14 +55,23 @@ const mainNavItems: NavItem[] = [
         icon: UtensilsCrossed,
     },
     {
-        title: 'Spectateurs',
-        href: '/admin/registrations/spectators',
-        icon: Users,
+        title: 'Inscriptions',
+        icon: UserCheck,
+        items: [
+            {
+                title: 'Spectateurs',
+                href: '/admin/registrations/spectators',
+            },
+            {
+                title: 'Candidats',
+                href: '/admin/registrations/candidates',
+            },
+        ],
     },
     {
-        title: 'Candidats',
-        href: '/admin/registrations/candidates',
-        icon: Users,
+        title: 'Récap',
+        href: '/admin/recap',
+        icon: ClipboardList,
     },
 ];
 

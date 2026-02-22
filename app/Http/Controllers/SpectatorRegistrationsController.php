@@ -14,7 +14,8 @@ class SpectatorRegistrationsController extends Controller
     public function store(): RedirectResponse
     {
         $validated = request()->validate([
-            'full_name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['required', 'string', 'max:50'],
             'accompanying_count' => ['nullable', 'integer', 'min:0', 'max:5'],
@@ -31,9 +32,13 @@ class SpectatorRegistrationsController extends Controller
 
         if (! EventSetting::current()->spectator_registrations_enabled) {
             throw ValidationException::withMessages([
-                'full_name' => "Les inscriptions spectateurs sont clôturées.",
+                'first_name' => "Les inscriptions spectateurs sont clôturées.",
             ]);
         }
+
+        $firstName = trim((string) $validated['first_name']);
+        $lastName = trim((string) $validated['last_name']);
+        $fullName = trim($firstName.' '.$lastName);
 
         $accompanying = (int) ($validated['accompanying_count'] ?? 0);
         $seatsRequested = 1 + $accompanying;
@@ -98,7 +103,7 @@ class SpectatorRegistrationsController extends Controller
             ]);
         }
 
-        DB::transaction(function () use ($validated, $seatsRequested, $accompanyingPeople, $foodWanted, $foodQuantities) {
+        DB::transaction(function () use ($validated, $seatsRequested, $accompanyingPeople, $foodWanted, $foodQuantities, $fullName) {
             $settings = EventSetting::query()
                 ->where('key', 'default')
                 ->lockForUpdate()
@@ -106,7 +111,7 @@ class SpectatorRegistrationsController extends Controller
 
             if (! $settings->spectator_registrations_enabled) {
                 throw ValidationException::withMessages([
-                    'full_name' => "Les inscriptions spectateurs sont clôturées.",
+                    'first_name' => "Les inscriptions spectateurs sont clôturées.",
                 ]);
             }
 
@@ -118,7 +123,7 @@ class SpectatorRegistrationsController extends Controller
 
             if ($seatsRemaining < $seatsRequested) {
                 throw ValidationException::withMessages([
-                    'full_name' => "Plus assez de places disponibles.",
+                    'first_name' => "Plus assez de places disponibles.",
                 ]);
             }
 
@@ -157,7 +162,7 @@ class SpectatorRegistrationsController extends Controller
             }
 
             SpectatorRegistration::query()->create([
-                'full_name' => $validated['full_name'],
+                'full_name' => $fullName,
                 'email' => $validated['email'],
                 'phone' => $validated['phone'],
                 'accompanying_count' => (int) ($validated['accompanying_count'] ?? 0),

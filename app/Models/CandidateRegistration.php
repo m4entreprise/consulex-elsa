@@ -11,6 +11,7 @@ class CandidateRegistration extends Model
         'email',
         'phone',
         'faculty',
+        'study_year',
         'text_pdf_path',
         'photo_path',
         'accepted_rgpd',

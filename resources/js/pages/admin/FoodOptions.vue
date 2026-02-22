@@ -16,12 +16,14 @@ type FoodOption = {
     label: string;
     sort_order: number;
     is_active: boolean;
+    ordered_quantity?: number;
 };
 
 const props = defineProps<{ foodOptions: FoodOption[] }>();
 
 const foodOptionItems = ref<FoodOption[]>([...props.foodOptions]);
 const foodOptionIds = computed(() => foodOptionItems.value.map((o) => o.id));
+const totalOrderedQuantity = computed(() => foodOptionItems.value.reduce((sum, o) => sum + (o.ordered_quantity ?? 0), 0));
 
 watch(
     () => props.foodOptions,
@@ -74,6 +76,10 @@ watch(
                     <div class="flex items-center justify-between gap-3">
                         <div class="text-sm font-medium">Liste</div>
 
+                        <div class="text-xs text-muted-foreground">
+                            Total commandé : <span class="font-medium text-foreground">{{ totalOrderedQuantity }}</span>
+                        </div>
+
                         <Form
                             action="/admin/food-options/reorder"
                             method="post"
@@ -105,6 +111,10 @@ watch(
                                         <GripVertical class="h-4 w-4" />
                                         Glisser pour réordonner
                                     </button>
+
+                                    <div class="text-sm text-muted-foreground">
+                                        Commandé : <span class="font-medium text-foreground">{{ o.ordered_quantity ?? 0 }}</span>
+                                    </div>
 
                                 <Form
                                     :action="`/admin/food-options/${o.id}`"

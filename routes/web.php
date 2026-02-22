@@ -6,6 +6,8 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\AfterMoviesController;
 use App\Http\Controllers\Admin\JuryMembersController;
 use App\Http\Controllers\Admin\PartnersController;
+use App\Http\Controllers\Admin\PracticalModalitiesController;
+use App\Http\Controllers\Admin\RecapController;
 use App\Http\Controllers\Admin\RegistrationsController;
 use App\Http\Controllers\CandidateRegistrationsController;
 use App\Http\Controllers\PublicController;
@@ -54,13 +56,24 @@ Route::middleware(['auth', 'verified', 'can:admin'])->prefix('admin')->name('adm
     Route::patch('/food-options/{foodOption}', [FoodOptionsController::class, 'update'])->name('food-options.update');
     Route::delete('/food-options/{foodOption}', [FoodOptionsController::class, 'destroy'])->name('food-options.destroy');
 
+    Route::get('/practical-modalities', [PracticalModalitiesController::class, 'index'])->name('practical-modalities.index');
+    Route::post('/practical-modalities', [PracticalModalitiesController::class, 'store'])->name('practical-modalities.store');
+    Route::post('/practical-modalities/reorder', [PracticalModalitiesController::class, 'reorder'])->name('practical-modalities.reorder');
+    Route::patch('/practical-modalities/{practicalModality}', [PracticalModalitiesController::class, 'update'])->name('practical-modalities.update');
+    Route::delete('/practical-modalities/{practicalModality}', [PracticalModalitiesController::class, 'destroy'])->name('practical-modalities.destroy');
+
+    Route::get('/recap', [RecapController::class, 'index'])->name('recap.index');
+
     Route::get('/registrations/spectators', [RegistrationsController::class, 'spectators'])->name('registrations.spectators');
     Route::get('/registrations/spectators/export', [RegistrationsController::class, 'exportSpectators'])->name('registrations.spectators.export');
+    Route::delete('/registrations/spectators/{spectatorRegistration}', [RegistrationsController::class, 'destroySpectator'])->name('registrations.spectators.destroy');
 
     Route::get('/registrations/candidates', [RegistrationsController::class, 'candidates'])->name('registrations.candidates');
     Route::get('/registrations/candidates/export', [RegistrationsController::class, 'exportCandidates'])->name('registrations.candidates.export');
+    Route::get('/registrations/candidates/download-archive', [RegistrationsController::class, 'downloadCandidatesArchive'])->name('registrations.candidates.download-archive');
     Route::get('/registrations/candidates/{candidateRegistration}/download-text', [RegistrationsController::class, 'downloadCandidateText'])->name('registrations.candidates.download-text');
     Route::get('/registrations/candidates/{candidateRegistration}/download-photo', [RegistrationsController::class, 'downloadCandidatePhoto'])->name('registrations.candidates.download-photo');
+    Route::delete('/registrations/candidates/{candidateRegistration}', [RegistrationsController::class, 'destroyCandidate'])->name('registrations.candidates.destroy');
 });
 
 require __DIR__.'/settings.php';

@@ -7,6 +7,7 @@ use App\Models\EventSetting;
 use App\Models\FoodOption;
 use App\Models\JuryMember;
 use App\Models\Partner;
+use App\Models\PracticalModality;
 use App\Models\SpectatorRegistration;
 use App\Models\CandidateRegistration;
 use Illuminate\Http\RedirectResponse;
@@ -32,6 +33,11 @@ class PublicController extends Controller
             ->limit(12)
             ->get();
 
+        $partners = Partner::query()
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+
         $juryMembers = JuryMember::query()
             ->where('is_active', true)
             ->orderBy('sort_order')
@@ -39,11 +45,17 @@ class PublicController extends Controller
             ->limit(10)
             ->get();
 
+        $practicalModalities = PracticalModality::query()
+            ->orderBy('order')
+            ->get();
+
         return Inertia::render('public/Home', [
             'settings' => $settings,
             'afterMovies' => $afterMovies,
             'featuredPartners' => $featuredPartners,
+            'partners' => $partners,
             'juryMembers' => $juryMembers,
+            'practicalModalities' => $practicalModalities,
         ]);
     }
 

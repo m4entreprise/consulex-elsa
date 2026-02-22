@@ -13,9 +13,18 @@ type Settings = {
     privacy_policy_url: string | null;
     rules_url: string | null;
     event_title?: string | null;
+    event_description?: string | null;
     event_theme?: string | null;
     event_date?: string | null;
     event_location?: string | null;
+    venue_room_name?: string | null;
+    venue_room_title?: string | null;
+    map_place_label?: string | null;
+    map_address?: string | null;
+    map_open_url?: string | null;
+    access_text?: string | null;
+    network_text?: string | null;
+    timeline?: Array<{ time?: string; label?: string; description?: string }> | null;
 };
 
 type FoodOption = {
@@ -30,12 +39,39 @@ const props = defineProps<{
     seatsRemaining: number;
 }>();
 
+const isClosed = computed(() => !props.settings.spectator_registrations_enabled || props.seatsRemaining === 0);
+
+const timelineSteps = computed(() => {
+    if (!Array.isArray(props.settings.timeline)) return [];
+
+    return props.settings.timeline
+        .map((s) => ({
+            time: typeof s?.time === 'string' ? s.time : '',
+            label: typeof s?.label === 'string' ? s.label : '',
+            description: typeof s?.description === 'string' ? s.description : '',
+        }))
+        .filter((s) => s.time || s.label || s.description);
+});
+
 const accompanyingCount = ref('0');
 const accompanyingCountNumber = computed(() => {
     const parsed = Number.parseInt(accompanyingCount.value, 10);
     if (Number.isNaN(parsed)) return 0;
     return Math.max(0, Math.min(5, parsed));
 });
+
+function setAccompanyingCount(next: number) {
+    const clamped = Math.max(0, Math.min(5, next));
+    accompanyingCount.value = String(clamped);
+}
+
+function incrementAccompanying() {
+    setAccompanyingCount(accompanyingCountNumber.value + 1);
+}
+
+function decrementAccompanying() {
+    setAccompanyingCount(accompanyingCountNumber.value - 1);
+}
 
 type AccompanyingPerson = {
     first_name: string;
@@ -121,9 +157,9 @@ function decrementFood(id: number) {
             <div class="relative mx-auto max-w-7xl px-4">
                 <div class="grid gap-10 lg:grid-cols-12 lg:items-start">
                     <div class="lg:col-span-5">
-                        <p class="text-xs font-semibold tracking-[0.34em] text-slate-700">
+                        <div class="inline-flex items-center rounded-full border border-slate-900/10 bg-white/55 px-4 py-2 text-[11px] font-semibold tracking-[0.34em] text-slate-700 shadow-sm">
                             INSCRIPTION
-                        </p>
+                        </div>
 
                         <h1
                             class="mt-5 break-words text-balance leading-[0.98] tracking-[-0.02em] text-slate-950 sm:leading-[0.92]"
@@ -133,29 +169,100 @@ function decrementFood(id: number) {
                         </h1>
 
                         <p class="mt-4 max-w-xl text-sm font-medium leading-relaxed text-slate-700 sm:text-base">
-                            Réserve ta place. Les accompagnants sont limités à 5.
+                            Réserve ta place et viens assister à l'événement.
+                            <span class="text-slate-700">Les accompagnants sont limités à 5.</span>
                         </p>
 
-                        <div class="mt-8 overflow-hidden rounded-2xl border border-slate-900/10 bg-white/55 shadow-sm">
-                            <div class="border-b border-slate-900/10 px-5 py-4">
-                                <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">Jauge</div>
-                                <div class="mt-2 text-base font-semibold text-slate-950">
-                                    {{ seatsRemaining }} restantes
-                                </div>
-                                <div class="mt-1 text-sm text-slate-700">
-                                    {{ seatsUsed }} occupées / {{ settings.spectator_capacity }}
+                        <div class="mt-8 grid gap-4">
+                            <div class="rounded-2xl border border-slate-900/10 bg-white/55 p-5 shadow-sm">
+                                <div class="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-600">Événement</div>
+
+                                <div class="mt-3 grid gap-3">
+                                    <div v-if="settings.event_theme" class="text-base font-semibold text-slate-950">
+                                        {{ settings.event_theme }}
+                                    </div>
+                                    <div v-if="settings.event_title" class="text-sm text-slate-700">
+                                        {{ settings.event_title }}
+                                    </div>
+                                    <div v-if="settings.event_description" class="text-sm leading-relaxed text-slate-600">
+                                        {{ settings.event_description }}
+                                    </div>
+
+                                    <div class="grid gap-2 text-sm text-slate-700">
+                                        <div v-if="settings.event_date" class="flex items-start justify-between gap-3">
+                                            <div class="text-slate-600">Date</div>
+                                            <div class="font-medium text-slate-950">{{ settings.event_date }}</div>
+                                        </div>
+                                        <div v-if="settings.event_location" class="flex items-start justify-between gap-3">
+                                            <div class="text-slate-600">Lieu</div>
+                                            <div class="font-medium text-slate-950">{{ settings.event_location }}</div>
+                                        </div>
+                                        <div v-if="settings.venue_room_title || settings.venue_room_name" class="flex items-start justify-between gap-3">
+                                            <div class="text-slate-600">Salle</div>
+                                            <div class="text-right font-medium text-slate-950">
+                                                <div v-if="settings.venue_room_title">{{ settings.venue_room_title }}</div>
+                                                <div v-if="settings.venue_room_name" class="text-sm font-normal text-slate-700">{{ settings.venue_room_name }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="px-5 py-4">
-                                <div
-                                    v-if="!settings.spectator_registrations_enabled || seatsRemaining === 0"
-                                    class="rounded-xl border border-red-900/10 bg-red-500/10 p-4 text-sm text-red-900"
-                                >
-                                    Les inscriptions spectateurs sont clôturées.
+                            <div v-if="settings.map_address || settings.map_open_url || settings.access_text || settings.network_text" class="rounded-2xl border border-slate-900/10 bg-white/55 p-5 shadow-sm">
+                                <div class="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-600">Infos pratiques</div>
+
+                                <div class="mt-3 grid gap-4">
+                                    <div v-if="settings.map_address || settings.map_place_label" class="grid gap-1">
+                                        <div class="text-sm font-semibold text-slate-950">
+                                            {{ settings.map_place_label || 'Adresse' }}
+                                        </div>
+                                        <div v-if="settings.map_address" class="text-sm whitespace-pre-line text-slate-700">
+                                            {{ settings.map_address }}
+                                        </div>
+                                        <a
+                                            v-if="settings.map_open_url"
+                                            :href="settings.map_open_url"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="mt-2 inline-flex w-fit items-center rounded-full border border-slate-900/15 bg-white/70 px-4 py-2 text-xs font-semibold text-slate-900 shadow-sm hover:bg-white"
+                                        >
+                                            Ouvrir sur la carte
+                                        </a>
+                                    </div>
+
+                                    <div v-if="settings.access_text" class="grid gap-1">
+                                        <div class="text-sm font-semibold text-slate-950">Accès</div>
+                                        <div class="text-sm whitespace-pre-line leading-relaxed text-slate-700">
+                                            {{ settings.access_text }}
+                                        </div>
+                                    </div>
+
+                                    <div v-if="settings.network_text" class="grid gap-1">
+                                        <div class="text-sm font-semibold text-slate-950">Réseau</div>
+                                        <div class="text-sm leading-relaxed text-slate-700">
+                                            {{ settings.network_text }}
+                                        </div>
+                                    </div>
                                 </div>
-                                <div v-else class="text-sm text-slate-600">
-                                    Les places sont attribuées dans la limite de la jauge.
+                            </div>
+
+                            <div v-if="timelineSteps.length" class="rounded-2xl border border-slate-900/10 bg-white/55 p-5 shadow-sm">
+                                <div class="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-600">Timeline</div>
+
+                                <div class="mt-3 grid gap-3">
+                                    <div v-for="(s, idx) in timelineSteps" :key="idx" class="rounded-xl border border-slate-900/10 bg-white/45 p-4">
+                                        <div class="flex flex-wrap items-baseline justify-between gap-2">
+                                            <div class="text-sm font-semibold text-slate-950">
+                                                {{ s.label || `Étape ${idx + 1}` }}
+                                            </div>
+                                            <div v-if="s.time" class="text-xs font-semibold tracking-wide text-slate-600">
+                                                {{ s.time }}
+                                            </div>
+                                        </div>
+                                        <div v-if="s.description" class="mt-2 text-sm whitespace-pre-line leading-relaxed text-slate-700">
+                                            {{ s.description }}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -178,6 +285,13 @@ function decrementFood(id: number) {
                             </div>
 
                             <div class="p-5 sm:p-6">
+                                <div
+                                    v-if="isClosed"
+                                    class="mb-5 rounded-2xl border border-red-900/10 bg-red-500/10 p-4 text-sm text-red-900"
+                                >
+                                    Les inscriptions spectateurs sont clôturées.
+                                </div>
+
                                 <Form
                                     action="/inscription/spectateurs"
                                     method="post"
@@ -185,15 +299,27 @@ function decrementFood(id: number) {
                                     v-slot="{ errors, processing }"
                                     :options="{ preserveScroll: true }"
                                 >
-                                    <div class="grid gap-2">
-                                        <Label for="full_name" class="text-sm font-semibold text-slate-950">Nom et prénom</Label>
-                                        <Input
-                                            id="full_name"
-                                            name="full_name"
-                                            required
-                                            class="h-11 rounded-xl border-slate-900/15 bg-white/60 px-4 text-slate-950 shadow-sm focus-visible:border-slate-900/25 focus-visible:ring-slate-900/15"
-                                        />
-                                        <InputError :message="errors.full_name" />
+                                    <div class="grid gap-4 sm:grid-cols-2">
+                                        <div class="grid gap-2">
+                                            <Label for="first_name" class="text-sm font-semibold text-slate-950">Prénom</Label>
+                                            <Input
+                                                id="first_name"
+                                                name="first_name"
+                                                required
+                                                class="h-11 rounded-xl border-slate-900/15 bg-white/60 px-4 text-slate-950 shadow-sm focus-visible:border-slate-900/25 focus-visible:ring-slate-900/15"
+                                            />
+                                            <InputError :message="errors.first_name" />
+                                        </div>
+                                        <div class="grid gap-2">
+                                            <Label for="last_name" class="text-sm font-semibold text-slate-950">Nom</Label>
+                                            <Input
+                                                id="last_name"
+                                                name="last_name"
+                                                required
+                                                class="h-11 rounded-xl border-slate-900/15 bg-white/60 px-4 text-slate-950 shadow-sm focus-visible:border-slate-900/25 focus-visible:ring-slate-900/15"
+                                            />
+                                            <InputError :message="errors.last_name" />
+                                        </div>
                                     </div>
 
                                     <div class="grid gap-4 sm:grid-cols-2">
@@ -225,15 +351,35 @@ function decrementFood(id: number) {
                                             <Label for="accompanying_count" class="text-sm font-semibold text-slate-950">
                                                 Accompagnants (0-5)
                                             </Label>
-                                            <Input
-                                                id="accompanying_count"
-                                                name="accompanying_count"
-                                                type="number"
-                                                min="0"
-                                                max="5"
-                                                v-model="accompanyingCount"
-                                                class="h-11 rounded-xl border-slate-900/15 bg-white/60 px-4 text-slate-950 shadow-sm focus-visible:border-slate-900/25 focus-visible:ring-slate-900/15"
-                                            />
+                                            <input type="hidden" name="accompanying_count" :value="accompanyingCountNumber" />
+
+                                            <div class="inline-flex w-full items-center justify-between gap-2 rounded-xl border border-slate-900/15 bg-white/60 p-1 shadow-sm">
+                                                <button
+                                                    type="button"
+                                                    class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-white/70 text-slate-950 shadow-sm transition hover:bg-white disabled:opacity-50"
+                                                    :disabled="accompanyingCountNumber <= 0"
+                                                    aria-label="Diminuer le nombre d'accompagnants"
+                                                    @click="decrementAccompanying"
+                                                >
+                                                    -
+                                                </button>
+
+                                                <div class="flex flex-1 items-center justify-center">
+                                                    <div class="text-sm font-semibold tabular-nums text-slate-950">
+                                                        {{ accompanyingCountNumber }}
+                                                    </div>
+                                                </div>
+
+                                                <button
+                                                    type="button"
+                                                    class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-white/70 text-slate-950 shadow-sm transition hover:bg-white disabled:opacity-50"
+                                                    :disabled="accompanyingCountNumber >= 5"
+                                                    aria-label="Augmenter le nombre d'accompagnants"
+                                                    @click="incrementAccompanying"
+                                                >
+                                                    +
+                                                </button>
+                                            </div>
                                             <InputError :message="errors.accompanying_count" />
                                             <InputError :message="errors.accompanying_people" />
                                         </div>
@@ -241,27 +387,35 @@ function decrementFood(id: number) {
                                         <div class="grid gap-2">
                                             <div class="text-sm font-semibold text-slate-950">Nourriture</div>
 
-                                            <div class="grid gap-2">
-                                                <label class="flex items-center gap-2 text-sm text-slate-700">
+                                            <div class="inline-flex w-full rounded-xl border border-slate-900/15 bg-white/60 p-1 shadow-sm">
+                                                <label class="flex-1">
                                                     <input
                                                         type="radio"
                                                         name="food_wanted"
                                                         value="0"
                                                         v-model="foodWantedChoice"
-                                                        class="size-4 rounded border-slate-900/20 bg-white/60 text-slate-950"
+                                                        class="peer sr-only"
                                                     />
-                                                    <span>Non</span>
+                                                    <span
+                                                        class="flex w-full items-center justify-center rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 transition peer-checked:bg-slate-950 peer-checked:text-[#f7f4ee]"
+                                                    >
+                                                        Non
+                                                    </span>
                                                 </label>
 
-                                                <label class="flex items-center gap-2 text-sm text-slate-700">
+                                                <label class="flex-1">
                                                     <input
                                                         type="radio"
                                                         name="food_wanted"
                                                         value="1"
                                                         v-model="foodWantedChoice"
-                                                        class="size-4 rounded border-slate-900/20 bg-white/60 text-slate-950"
+                                                        class="peer sr-only"
                                                     />
-                                                    <span>Oui</span>
+                                                    <span
+                                                        class="flex w-full items-center justify-center rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 transition peer-checked:bg-slate-950 peer-checked:text-[#f7f4ee]"
+                                                    >
+                                                        Oui
+                                                    </span>
                                                 </label>
                                             </div>
 
@@ -412,7 +566,7 @@ function decrementFood(id: number) {
                                         <Button
                                             type="submit"
                                             class="h-12 w-full rounded-full bg-slate-950 px-6 text-sm font-semibold tracking-wide text-[#f7f4ee] shadow-[0_0_0_1px_rgba(15,23,42,0.18),0_18px_40px_rgba(15,23,42,0.14)] hover:bg-slate-900"
-                                            :disabled="processing || !settings.spectator_registrations_enabled || seatsRemaining === 0"
+                                            :disabled="processing || isClosed"
                                         >
                                             Valider l'inscription
                                         </Button>

@@ -16,9 +16,13 @@ const props = withDefaults(defineProps<Props>(), {
 
 const page = usePage();
 const appName = computed(() => page.props.name);
-const instagramUrl = computed(() => (page.props as any)?.settings?.instagram_url ?? null);
-const privacyPolicyUrl = computed(() => (page.props as any)?.settings?.privacy_policy_url ?? null);
-const rulesUrl = computed(() => (page.props as any)?.settings?.rules_url ?? null);
+const settings = computed(() => (page.props as any)?.settings ?? null);
+const instagramUrl = computed(() => (settings.value as any)?.instagram_url ?? null);
+const privacyPolicyUrl = computed(() => (settings.value as any)?.privacy_policy_url ?? null);
+const rulesUrl = computed(() => (settings.value as any)?.rules_url ?? null);
+const footerBrand = computed(() => (settings.value as any)?.footer_brand || appName.value);
+const footerDescription = computed(() => (settings.value as any)?.footer_description || '');
+const footerCopyright = computed(() => (settings.value as any)?.footer_copyright || `© ${new Date().getFullYear()}`);
 const hasFlash = computed(() => Boolean((page.props as any)?.flash?.success || (page.props as any)?.flash?.error));
 
 const { isCurrentUrl } = useCurrentUrl();
@@ -146,19 +150,22 @@ function closeMobileMenu() {
         <footer class="border-t border-border/60 bg-gradient-to-b from-background to-muted/20">
             <div class="mx-auto max-w-7xl px-4 py-12">
                 <div class="grid gap-10 md:grid-cols-12">
-                    <div class="md:col-span-5">
+                    <div class="min-w-0 md:col-span-5">
                         <div
                             class="text-base font-semibold text-foreground"
                             style="font-family: 'Playfair Display', ui-serif, Georgia, serif;"
                         >
-                            {{ appName }}
+                            {{ footerBrand }}
                         </div>
-                        <div class="mt-2 text-sm text-muted-foreground">
-                            © {{ new Date().getFullYear() }}
+                        <div v-if="footerDescription" class="mt-2 break-words text-sm text-muted-foreground [overflow-wrap:anywhere]">
+                            {{ footerDescription }}
+                        </div>
+                        <div class="mt-2 break-words text-sm text-muted-foreground [overflow-wrap:anywhere]">
+                            {{ footerCopyright }}
                         </div>
                     </div>
 
-                    <div class="md:col-span-4">
+                    <div class="min-w-0 md:col-span-4">
                         <div class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                             Navigation
                         </div>
@@ -170,7 +177,7 @@ function closeMobileMenu() {
                         </div>
                     </div>
 
-                    <div class="md:col-span-3">
+                    <div class="min-w-0 md:col-span-3">
                         <div class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                             Informations
                         </div>
@@ -215,12 +222,136 @@ function closeMobileMenu() {
                         <div>
                             Tous droits réservés.
                         </div>
-                        <div>
-                            Conçu pour une expérience optimale sur mobile et desktop.
-                        </div>
+                        <a
+                            href="https://www.m4entreprise.be"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="m4-credit w-fit"
+                        >
+                            <span class="m4-credit__label">Un site web développé et designé par</span>
+                            <span class="m4-credit__brand">M4 Entreprise</span>
+                        </a>
                     </div>
                 </div>
             </div>
         </footer>
     </div>
 </template>
+
+<style scoped>
+.m4-credit {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    padding: 0.5rem 0.8rem;
+    color: rgba(51, 65, 85, 0.95);
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    box-shadow:
+        0 10px 22px rgba(15, 23, 42, 0.06),
+        0 2px 10px rgba(15, 23, 42, 0.04);
+    backdrop-filter: blur(8px);
+    transform: translateZ(0);
+    transition:
+        transform 180ms ease,
+        box-shadow 180ms ease,
+        border-color 180ms ease;
+}
+
+.m4-credit::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+        90deg,
+        rgba(15, 23, 42, 0.08),
+        rgba(180, 83, 9, 0.16),
+        rgba(15, 23, 42, 0.08)
+    );
+    background-size: 220% 100%;
+    opacity: 0.95;
+    pointer-events: none;
+    -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: m4-border 7.5s ease-in-out infinite;
+}
+
+.m4-credit::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    background-size: 220px 100%;
+    opacity: 0.35;
+    pointer-events: none;
+    mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+    animation: m4-shimmer 3.2s linear infinite;
+}
+
+.m4-credit:hover {
+    transform: translateY(-1px) scale(1.01);
+    border-color: rgba(15, 23, 42, 0.18);
+    box-shadow:
+        0 14px 30px rgba(15, 23, 42, 0.10),
+        0 4px 14px rgba(180, 83, 9, 0.08);
+}
+
+.m4-credit:focus-visible {
+    outline: 2px solid rgba(180, 83, 9, 0.40);
+    outline-offset: 3px;
+}
+
+.m4-credit__label {
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    opacity: 0.92;
+}
+
+.m4-credit__brand {
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: rgba(15, 23, 42, 0.92);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+@keyframes m4-shimmer {
+    from {
+        background-position: -220px 0;
+    }
+    to {
+        background-position: calc(100% + 220px) 0;
+    }
+}
+
+@keyframes m4-border {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .m4-credit,
+    .m4-credit::before,
+    .m4-credit::after {
+        animation: none;
+    }
+}
+</style>

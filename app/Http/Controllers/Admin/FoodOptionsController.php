@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\FoodOption;
+use App\Models\SpectatorRegistration;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -18,6 +19,51 @@ class FoodOptionsController extends Controller
             ->orderBy('sort_order')
             ->orderBy('label')
             ->get();
+
+        $orderedById = [];
+
+        foreach ($foodOptions as $o) {
+            $orderedById[$o->id] = 0;
+        }
+
+        $registrations = SpectatorRegistration::query()
+            ->select(['food_option_id', 'food_quantities'])
+            ->where(function ($query) {
+                $query
+                    ->whereNotNull('food_option_id')
+                    ->orWhereNotNull('food_quantities');
+            })
+            ->get();
+
+        foreach ($registrations as $r) {
+            $quantities = $r->food_quantities;
+
+            if (is_array($quantities)) {
+                foreach ($quantities as $id => $qty) {
+                    $intId = (int) $id;
+                    if (! array_key_exists($intId, $orderedById)) {
+                        continue;
+                    }
+
+                    $orderedById[$intId] += max(0, (int) $qty);
+                }
+
+                continue;
+            }
+
+            if (! empty($r->food_option_id) && array_key_exists((int) $r->food_option_id, $orderedById)) {
+                $orderedById[(int) $r->food_option_id] += 1;
+            }
+        }
+
+        $foodOptions = $foodOptions
+            ->map(function (FoodOption $o) use ($orderedById) {
+                return [
+                    ...$o->toArray(),
+                    'ordered_quantity' => (int) ($orderedById[$o->id] ?? 0),
+                ];
+            })
+            ->values();
 
         return Inertia::render('admin/FoodOptions', [
             'foodOptions' => $foodOptions,

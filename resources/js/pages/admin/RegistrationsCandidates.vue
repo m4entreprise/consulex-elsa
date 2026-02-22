@@ -3,6 +3,7 @@ import FlashMessages from '@/components/FlashMessages.vue';
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { router } from '@inertiajs/vue3';
 
 type Settings = {
     candidate_capacity: number;
@@ -14,6 +15,7 @@ type Registration = {
     email: string;
     phone: string;
     faculty: string;
+    study_year?: string | null;
     created_at: string;
 };
 
@@ -21,6 +23,16 @@ defineProps<{
     settings: Settings;
     registrations: Registration[];
 }>();
+
+const deleteRegistration = (id: number) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette inscription ?')) {
+        return;
+    }
+
+    router.delete(`/admin/registrations/candidates/${id}`, {
+        preserveScroll: true,
+    });
+};
 </script>
 
 <template>
@@ -37,6 +49,9 @@ defineProps<{
                     <Button as-child variant="secondary">
                         <a href="/admin/registrations/candidates/export">Exporter CSV</a>
                     </Button>
+                    <Button as-child variant="secondary">
+                        <a href="/admin/registrations/candidates/download-archive">Télécharger ZIP</a>
+                    </Button>
                 </div>
             </div>
 
@@ -50,7 +65,9 @@ defineProps<{
                                 <th class="px-4 py-3">Email</th>
                                 <th class="px-4 py-3">Téléphone</th>
                                 <th class="px-4 py-3">Faculté</th>
+                                <th class="px-4 py-3">Année</th>
                                 <th class="px-4 py-3">Fichiers</th>
+                                <th class="px-4 py-3">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -66,6 +83,7 @@ defineProps<{
                                 <td class="px-4 py-3">{{ r.email }}</td>
                                 <td class="px-4 py-3">{{ r.phone }}</td>
                                 <td class="px-4 py-3">{{ r.faculty }}</td>
+                                <td class="px-4 py-3">{{ r.study_year || '—' }}</td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-2">
                                         <a
@@ -78,14 +96,23 @@ defineProps<{
                                             class="underline underline-offset-4"
                                             :href="`/admin/registrations/candidates/${r.id}/download-photo`"
                                         >
-                                            Photo
+                                            Preuve ULG
                                         </a>
                                     </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <Button
+                                        variant="destructive"
+                                        size="sm"
+                                        @click="deleteRegistration(r.id)"
+                                    >
+                                        Supprimer
+                                    </Button>
                                 </td>
                             </tr>
 
                             <tr v-if="registrations.length === 0">
-                                <td class="px-4 py-8 text-muted-foreground" colspan="6">
+                                <td class="px-4 py-8 text-muted-foreground" colspan="8">
                                     Aucune inscription.
                                 </td>
                             </tr>

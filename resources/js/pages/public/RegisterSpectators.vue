@@ -5,7 +5,14 @@ import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import PublicLayout from '@/layouts/PublicLayout.vue';
+import { Info } from 'lucide-vue-next';
 
 type Settings = {
     spectator_capacity: number;
@@ -385,7 +392,29 @@ function decrementFood(id: number) {
                                         </div>
 
                                         <div class="grid gap-2">
-                                            <div class="text-sm font-semibold text-slate-950">Nourriture</div>
+                                            <div class="flex flex-wrap items-center gap-2">
+                                                <div class="text-sm font-semibold text-slate-950">Nourriture</div>
+                                                <div class="text-xs font-semibold text-slate-600">(indicatif)</div>
+
+                                                <TooltipProvider :delay-duration="0">
+                                                    <Tooltip>
+                                                        <TooltipTrigger>
+                                                            <button
+                                                                type="button"
+                                                                class="inline-flex h-7 w-7 items-center justify-center rounded-full border border-slate-900/15 bg-white/70 text-slate-950 shadow-sm hover:bg-white"
+                                                                aria-label="Information : nourriture indicative"
+                                                            >
+                                                                <Info class="h-4 w-4" />
+                                                            </button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent class="max-w-xs">
+                                                            <p>
+                                                                Information indicative : cela ne t'engage pas et n'implique aucun paiement obligatoire le jour J.
+                                                            </p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
+                                            </div>
 
                                             <div class="inline-flex w-full rounded-xl border border-slate-900/15 bg-white/60 p-1 shadow-sm">
                                                 <label class="flex-1">

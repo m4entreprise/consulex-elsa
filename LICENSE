@@ -1,0 +1,41 @@
+# CONTRAT DE LICENCE : M4 LICENSE 7
+ 
+ ## PRÉAMBULE ET DÉFINITIONS
+ 
+ La présente licence (ci-après la « Licence ») régit l'accès, l'utilisation, la modification et la distribution du code source et de la documentation associée (ci-après collectivement désignés le « Logiciel »).
+ 
+ - **Le Propriétaire et Créateur** : Désigne la société M4 Entreprise, titulaire exclusif de l'intégralité des droits de propriété intellectuelle (droits moraux et patrimoniaux) sur le Logiciel.
+ - **Le Bénéficiaire Principal** : Désigne ConsuLex ULiège, à qui M4 Entreprise concède des droits d'utilisation étendus dans le cadre d'un accord privé distinct de la présente Licence publique.
+ - **Le Licencié** : Désigne toute personne physique ou morale accédant au code source du Logiciel par le biais de sa mise à disposition publique.
+ 
+ ## ARTICLE 1 : OBJET DE LA LICENCE
+ 
+ Le Propriétaire accorde au Licencié un droit mondial, non exclusif, gratuit et révocable d'utiliser, de copier, de modifier et de distribuer le Logiciel, strictement et exclusivement à des fins non commerciales, sous réserve du respect des conditions énoncées ci-après.
+ 
+ ## ARTICLE 2 : DROIT DE PATERNITÉ ET OBLIGATION D'ATTRIBUTION
+ 
+ Toute reproduction, représentation, modification ou diffusion du Logiciel, totale ou partielle, doit obligatoirement, clairement et visiblement comporter la mention suivante :
+ 
+ > « Logiciel original conçu, développé et appartenant à M4 Entreprise. Projet initialement réalisé pour le compte de ConsuLex ULiège. »
+ 
+ ## ARTICLE 3 : LIBERTÉ D'USAGE NON COMMERCIAL
+ 
+ Le Licencié est libre d'utiliser et de modifier le Logiciel pour des projets personnels, académiques, de recherche ou tout autre usage ne générant aucun revenu. Il n'est pas nécessaire de solliciter l'accord préalable de M4 Entreprise pour ces usages spécifiques.
+ 
+ ## ARTICLE 4 : RESTRICTION COMMERCIALE ET ACCORD PRÉALABLE OBLIGATOIRE
+ 
+ Toute utilisation, intégration, distribution ou exploitation du Logiciel (ou d'une œuvre dérivée) à des fins commerciales est strictement interdite sous cette Licence.
+ 
+ Pour toute utilisation commerciale (vente, intégration dans un produit payant, prestation de service facturée, etc.), une licence commerciale distincte doit obligatoirement être négociée au préalable avec le Propriétaire. Le Licencié doit pour cela contacter M4 Entreprise.
+ 
+ ## ARTICLE 5 : CLAUSE DE PARTAGE À L'IDENTIQUE (COPYLEFT NON COMMERCIAL)
+ 
+ Toute œuvre dérivée ou modification apportée au Logiciel et distribuée par le Licencié doit obligatoirement être rendue accessible sous les termes stricts et identiques de la présente M4 License 7. Il est interdit de modifier la licence d'une œuvre dérivée pour en fermer le code ou en autoriser l'usage commercial sans l'accord de M4 Entreprise.
+ 
+ ## ARTICLE 6 : EXCLUSION DE GARANTIE ET LIMITATION DE RESPONSABILITÉ
+ 
+ Le Logiciel est fourni « en l'état », sans aucune garantie expresse ou implicite. Le Propriétaire (M4 Entreprise) ne pourra en aucun cas être tenu responsable des dommages directs, indirects ou consécutifs découlant de l'utilisation ou de l'incapacité à utiliser le Logiciel par le Licencié.
+ 
+ ## ARTICLE 7 : DROIT APPLICABLE ET JURIDICTION COMPÉTENTE
+ 
+ La présente Licence est régie par le droit belge. Tout litige relatif à son interprétation ou à son exécution sera soumis à la compétence exclusive des cours et tribunaux de l'arrondissement judiciaire de Liège.

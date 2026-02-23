@@ -18,12 +18,8 @@ class EventSettingsController extends Controller
     {
         $settings = EventSetting::current();
 
-        $settingsPayload = $settings->toArray();
-        $settingsPayload['spectator_registrations_enabled'] = (bool) $settings->getRawOriginal('spectator_registrations_enabled');
-        $settingsPayload['candidate_registrations_enabled'] = (bool) $settings->getRawOriginal('candidate_registrations_enabled');
-
         return Inertia::render('admin/Settings', [
-            'settings' => $settingsPayload,
+            'settings' => $settings,
         ]);
     }
 
@@ -101,12 +97,19 @@ class EventSettingsController extends Controller
             $settings->rules_url = Storage::disk('public')->putFile('legal', request()->file('rules_pdf'));
         }
 
+        $spectatorEnabled = (bool) request()->boolean('spectator_registrations_enabled');
+        $candidateEnabled = (bool) request()->boolean('candidate_registrations_enabled');
+
         $fill = [
             ...$data,
-            'spectator_registrations_enabled' => (bool) request()->boolean('spectator_registrations_enabled'),
-            'spectator_registrations_end_at' => $this->parseNullableLocalDatetime('spectator_registrations_end_at', $validated['spectator_registrations_end_at'] ?? null),
-            'candidate_registrations_enabled' => (bool) request()->boolean('candidate_registrations_enabled'),
-            'candidate_registrations_end_at' => $this->parseNullableLocalDatetime('candidate_registrations_end_at', $validated['candidate_registrations_end_at'] ?? null),
+            'spectator_registrations_enabled' => $spectatorEnabled,
+            'spectator_registrations_end_at' => $spectatorEnabled
+                ? null
+                : $this->parseNullableLocalDatetime('spectator_registrations_end_at', $validated['spectator_registrations_end_at'] ?? null),
+            'candidate_registrations_enabled' => $candidateEnabled,
+            'candidate_registrations_end_at' => $candidateEnabled
+                ? null
+                : $this->parseNullableLocalDatetime('candidate_registrations_end_at', $validated['candidate_registrations_end_at'] ?? null),
         ];
 
         if (array_key_exists('timeline_json', $validated)) {

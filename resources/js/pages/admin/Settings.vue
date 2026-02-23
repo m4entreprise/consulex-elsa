@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Form } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import FlashMessages from '@/components/FlashMessages.vue';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
@@ -68,6 +68,24 @@ function toDatetimeLocalValue(value: string | null) {
     const min = pad(d.getMinutes());
     return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
 }
+
+const spectatorRegistrationsEnabled = ref<boolean>(Boolean(props.settings.spectator_registrations_enabled));
+const candidateRegistrationsEnabled = ref<boolean>(Boolean(props.settings.candidate_registrations_enabled));
+
+const spectatorRegistrationsEndAt = ref<string>(toDatetimeLocalValue(props.settings.spectator_registrations_end_at));
+const candidateRegistrationsEndAt = ref<string>(toDatetimeLocalValue(props.settings.candidate_registrations_end_at));
+
+watch(spectatorRegistrationsEnabled, (enabled) => {
+    if (enabled) {
+        spectatorRegistrationsEndAt.value = '';
+    }
+});
+
+watch(candidateRegistrationsEnabled, (enabled) => {
+    if (enabled) {
+        candidateRegistrationsEndAt.value = '';
+    }
+});
 
 function newTimelineUid() {
     return `${Math.random().toString(36).slice(2)}-${Date.now().toString(36)}`;
@@ -391,7 +409,8 @@ const timelineJson = computed(() => {
                                     id="spectator_registrations_end_at"
                                     name="spectator_registrations_end_at"
                                     type="datetime-local"
-                                    :default-value="toDatetimeLocalValue(settings.spectator_registrations_end_at)"
+                                    v-model="spectatorRegistrationsEndAt"
+                                    :disabled="spectatorRegistrationsEnabled"
                                 />
                                 <InputError :message="errors.spectator_registrations_end_at" />
                             </div>
@@ -402,7 +421,8 @@ const timelineJson = computed(() => {
                                     id="candidate_registrations_end_at"
                                     name="candidate_registrations_end_at"
                                     type="datetime-local"
-                                    :default-value="toDatetimeLocalValue(settings.candidate_registrations_end_at)"
+                                    v-model="candidateRegistrationsEndAt"
+                                    :disabled="candidateRegistrationsEnabled"
                                 />
                                 <InputError :message="errors.candidate_registrations_end_at" />
                             </div>
@@ -414,7 +434,7 @@ const timelineJson = computed(() => {
                                     type="checkbox"
                                     name="spectator_registrations_enabled"
                                     class="size-4"
-                                    :checked="settings.spectator_registrations_enabled"
+                                    v-model="spectatorRegistrationsEnabled"
                                 />
                                 <span>Inscriptions spectateurs ouvertes</span>
                             </label>
@@ -424,7 +444,7 @@ const timelineJson = computed(() => {
                                     type="checkbox"
                                     name="candidate_registrations_enabled"
                                     class="size-4"
-                                    :checked="settings.candidate_registrations_enabled"
+                                    v-model="candidateRegistrationsEnabled"
                                 />
                                 <span>Inscriptions candidats ouvertes</span>
                             </label>

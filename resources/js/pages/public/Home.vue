@@ -248,6 +248,217 @@ onBeforeUnmount(() => {
                 <div class="grid gap-10 lg:grid-cols-12 lg:items-end">
                     <div class="lg:col-span-10">
                         <p class="text-xs font-semibold tracking-[0.34em] text-slate-700">
+                            MODALITÉS PRATIQUES
+                        </p>
+
+                        <h2
+                            class="mt-5 break-words text-balance leading-[0.98] tracking-[-0.02em] text-slate-950 sm:leading-[0.92]"
+                            style="font-family: 'Playfair Display', ui-serif, Georgia, serif; font-size: clamp(2.1rem, 6.5vw, 4.75rem);"
+                        >
+                            Modalités pratiques
+                        </h2>
+
+                        <p class="mt-4 max-w-3xl text-sm font-medium leading-relaxed text-slate-700 sm:text-base">
+                            Informations essentielles — horaires, accès, tenue, contacts et conditions.
+                        </p>
+                    </div>
+
+                    <div class="hidden lg:col-span-2 lg:flex lg:justify-end">
+                        <div class="rounded-2xl border border-slate-900/10 bg-white/55 px-4 py-6 text-center shadow-sm">
+                            <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">Dernières infos</div>
+                            <div class="mt-2 text-3xl font-semibold text-slate-950" style="font-family: 'Playfair Display', ui-serif, Georgia, serif;">J-7</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-10 grid gap-4 lg:grid-cols-12">
+                    <div class="lg:col-span-7">
+                        <div class="group relative h-full overflow-hidden rounded-2xl border border-slate-900/10 bg-white/55 shadow-sm">
+                            <div class="relative flex min-h-[340px] flex-col lg:min-h-0 lg:h-full">
+                                <div class="relative flex-1">
+                                    <div class="absolute inset-0">
+                                        <img
+                                            v-for="(src, idx) in modPratImages"
+                                            :key="src"
+                                            :src="src"
+                                            :alt="`${settings.venue_room_name || ''} – ${settings.venue_room_title || ''}`"
+                                            class="absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-1000 ease-in-out"
+                                            :class="modPratActive === idx ? 'opacity-90' : 'opacity-0'"
+                                            loading="lazy"
+                                        />
+                                    </div>
+                                    <div
+                                        class="absolute inset-0 bg-[linear-gradient(to_top,rgba(247,244,238,0.92),rgba(247,244,238,0.25),rgba(247,244,238,0.06))]"
+                                        aria-hidden="true"
+                                    />
+                                    <div class="absolute bottom-0 left-0 right-0 p-6">
+                                        <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">
+                                            {{ settings.venue_room_name || '—' }}
+                                        </div>
+                                        <div class="mt-2 text-base font-semibold text-slate-950">
+                                            {{ settings.venue_room_title || '—' }}
+                                        </div>
+                                        <div class="mt-1 text-sm text-slate-700">
+                                            Galerie (fade) — {{ modPratActive + 1 }}/{{ modPratImages.length }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-5">
+                        <div class="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-900/10 bg-white/55 shadow-sm">
+                            <div class="flex items-center justify-between gap-4 border-b border-slate-900/10 px-5 py-4">
+                                <div>
+                                    <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">
+                                        Plan
+                                    </div>
+                                    <div class="mt-1 text-sm font-semibold text-slate-950">{{ settings.map_place_label || settings.venue_room_title || '—' }}</div>
+                                </div>
+                                <a
+                                    v-if="settings.map_open_url"
+                                    :href="settings.map_open_url"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="text-xs text-slate-600 transition hover:text-slate-950"
+                                >
+                                    Ouvrir
+                                </a>
+                            </div>
+
+                            <div class="relative min-h-[280px] flex-1">
+                                <iframe
+                                    v-if="settings.map_embed_url"
+                                    class="absolute inset-0 h-full w-full"
+                                    :title="`Carte – ${settings.map_place_label || settings.venue_room_title || ''}`"
+                                    loading="lazy"
+                                    referrerpolicy="no-referrer-when-downgrade"
+                                    :src="settings.map_embed_url"
+                                />
+                                <div
+                                    v-else
+                                    class="flex h-full min-h-[280px] items-center justify-center p-6 text-sm text-slate-600"
+                                >
+                                    Carte à venir.
+                                </div>
+                                <div
+                                    class="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(247,244,238,0.40),transparent_65%)]"
+                                    aria-hidden="true"
+                                />
+                            </div>
+
+                            <div class="px-5 py-4 text-sm text-slate-700">
+                                <div>
+                                    <span class="font-semibold text-slate-950">Adresse:</span>
+                                    <span class="whitespace-pre-line">{{ settings.map_address || '—' }}</span>
+                                </div>
+                                <div class="mt-2">
+                                    <span class="font-semibold text-slate-950">Accès:</span>
+                                    <span class="whitespace-pre-line">{{ settings.access_text || '—' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 rounded-2xl border border-slate-900/10 bg-white/55 p-6 shadow-sm">
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                            <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">
+                                Timeline
+                            </div>
+                            <div class="mt-2 text-sm text-slate-700">
+                                Une lecture rapide de la soirée.
+                            </div>
+                        </div>
+                        <div class="text-xs text-slate-600">
+                            Merci d'arriver 20 minutes avant le début.
+                        </div>
+                    </div>
+
+                    <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                        <template v-if="settings.timeline && settings.timeline.length">
+                            <div
+                                v-for="(item, idx) in settings.timeline"
+                                :key="idx"
+                                class="rounded-xl border border-slate-900/10 bg-white/60 p-4"
+                            >
+                                <div class="flex items-center justify-between gap-3">
+                                    <div class="text-xs text-slate-600">{{ item.label || '—' }}</div>
+                                    <div class="h-2 w-2 rounded-full bg-slate-900/15" aria-hidden="true" />
+                                </div>
+                                <div class="mt-2 text-lg font-semibold text-slate-950">{{ item.time || '' }}</div>
+                                <div class="mt-1 text-xs text-slate-600">{{ item.description || '' }}</div>
+                            </div>
+                        </template>
+
+                        <div
+                            v-else
+                            class="rounded-xl border border-slate-900/10 bg-white/60 p-4 text-sm text-slate-600 sm:col-span-2 lg:col-span-4"
+                        >
+                            Timeline à venir.
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="practicalModalities.length" class="mx-auto mt-16 max-w-7xl px-6 lg:px-8">
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                            <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">
+                                Modalités pratiques
+                            </div>
+                            <div class="mt-2 text-sm text-slate-700">
+                                Informations utiles pour votre venue.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <div
+                            v-for="modality in practicalModalities"
+                            :key="modality.id"
+                            class="rounded-xl border border-slate-900/10 bg-white/60 p-6"
+                        >
+                            <div class="flex items-start gap-4">
+                                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-slate-100">
+                                    <component :is="getIconComponent(modality.icon_name)" class="h-6 w-6 text-slate-700" />
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="break-words font-semibold leading-snug text-slate-900">{{ modality.title }}</h3>
+                                    <p class="mt-1 break-words whitespace-pre-line text-sm leading-relaxed text-slate-600 [overflow-wrap:anywhere]">{{ modality.description }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="pointer-events-none absolute left-6 top-6 hidden h-12 w-12 border-l border-t border-slate-900/20 lg:block"
+                aria-hidden="true"
+            />
+            <div
+                class="pointer-events-none absolute right-6 top-6 hidden h-12 w-12 border-r border-t border-slate-900/20 lg:block"
+                aria-hidden="true"
+            />
+            <div
+                class="pointer-events-none absolute left-6 bottom-6 hidden h-12 w-12 border-l border-b border-slate-900/20 lg:block"
+                aria-hidden="true"
+            />
+            <div
+                class="pointer-events-none absolute right-6 bottom-6 hidden h-12 w-12 border-r border-b border-slate-900/20 lg:block"
+                aria-hidden="true"
+            />
+        </section>
+
+        <section
+            class="relative overflow-hidden bg-[#f7f4ee] py-16 supports-[height:100svh]:py-16 sm:py-20 lg:py-28"
+        >
+            <div class="mx-auto max-w-7xl px-4">
+                <div class="grid gap-10 lg:grid-cols-12 lg:items-end">
+                    <div class="lg:col-span-10">
+                        <p class="text-xs font-semibold tracking-[0.34em] text-slate-700">
                             AFTERMOVIE
                         </p>
 
@@ -571,217 +782,6 @@ onBeforeUnmount(() => {
                             </div>
                             <div class="mt-4 text-xs text-slate-500">
                                 {{ activeJuryCardIndex === idx ? 'Toucher / cliquer pour fermer' : 'Toucher / cliquer pour épingler' }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div
-                class="pointer-events-none absolute left-6 top-6 hidden h-12 w-12 border-l border-t border-slate-900/20 lg:block"
-                aria-hidden="true"
-            />
-            <div
-                class="pointer-events-none absolute right-6 top-6 hidden h-12 w-12 border-r border-t border-slate-900/20 lg:block"
-                aria-hidden="true"
-            />
-            <div
-                class="pointer-events-none absolute left-6 bottom-6 hidden h-12 w-12 border-l border-b border-slate-900/20 lg:block"
-                aria-hidden="true"
-            />
-            <div
-                class="pointer-events-none absolute right-6 bottom-6 hidden h-12 w-12 border-r border-b border-slate-900/20 lg:block"
-                aria-hidden="true"
-            />
-        </section>
-
-        <section
-            class="relative overflow-hidden bg-[#f7f4ee] py-16 supports-[height:100svh]:py-16 sm:py-20 lg:py-28"
-        >
-            <div class="mx-auto max-w-7xl px-4">
-                <div class="grid gap-10 lg:grid-cols-12 lg:items-end">
-                    <div class="lg:col-span-10">
-                        <p class="text-xs font-semibold tracking-[0.34em] text-slate-700">
-                            MODALITÉS PRATIQUES
-                        </p>
-
-                        <h2
-                            class="mt-5 break-words text-balance leading-[0.98] tracking-[-0.02em] text-slate-950 sm:leading-[0.92]"
-                            style="font-family: 'Playfair Display', ui-serif, Georgia, serif; font-size: clamp(2.1rem, 6.5vw, 4.75rem);"
-                        >
-                            Modalités pratiques
-                        </h2>
-
-                        <p class="mt-4 max-w-3xl text-sm font-medium leading-relaxed text-slate-700 sm:text-base">
-                            Informations essentielles — horaires, accès, tenue, contacts et conditions.
-                        </p>
-                    </div>
-
-                    <div class="hidden lg:col-span-2 lg:flex lg:justify-end">
-                        <div class="rounded-2xl border border-slate-900/10 bg-white/55 px-4 py-6 text-center shadow-sm">
-                            <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">Dernières infos</div>
-                            <div class="mt-2 text-3xl font-semibold text-slate-950" style="font-family: 'Playfair Display', ui-serif, Georgia, serif;">J-7</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-10 grid gap-4 lg:grid-cols-12">
-                    <div class="lg:col-span-7">
-                        <div class="group relative h-full overflow-hidden rounded-2xl border border-slate-900/10 bg-white/55 shadow-sm">
-                            <div class="relative flex min-h-[340px] flex-col lg:min-h-0 lg:h-full">
-                                <div class="relative flex-1">
-                                    <div class="absolute inset-0">
-                                        <img
-                                            v-for="(src, idx) in modPratImages"
-                                            :key="src"
-                                            :src="src"
-                                            :alt="`${settings.venue_room_name || ''} – ${settings.venue_room_title || ''}`"
-                                            class="absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-1000 ease-in-out"
-                                            :class="modPratActive === idx ? 'opacity-90' : 'opacity-0'"
-                                            loading="lazy"
-                                        />
-                                    </div>
-                                    <div
-                                        class="absolute inset-0 bg-[linear-gradient(to_top,rgba(247,244,238,0.92),rgba(247,244,238,0.25),rgba(247,244,238,0.06))]"
-                                        aria-hidden="true"
-                                    />
-                                    <div class="absolute bottom-0 left-0 right-0 p-6">
-                                        <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">
-                                            {{ settings.venue_room_name || '—' }}
-                                        </div>
-                                        <div class="mt-2 text-base font-semibold text-slate-950">
-                                            {{ settings.venue_room_title || '—' }}
-                                        </div>
-                                        <div class="mt-1 text-sm text-slate-700">
-                                            Galerie (fade) — {{ modPratActive + 1 }}/{{ modPratImages.length }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="lg:col-span-5">
-                        <div class="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-900/10 bg-white/55 shadow-sm">
-                            <div class="flex items-center justify-between gap-4 border-b border-slate-900/10 px-5 py-4">
-                                <div>
-                                    <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">
-                                        Plan
-                                    </div>
-                                    <div class="mt-1 text-sm font-semibold text-slate-950">{{ settings.map_place_label || settings.venue_room_title || '—' }}</div>
-                                </div>
-                                <a
-                                    v-if="settings.map_open_url"
-                                    :href="settings.map_open_url"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="text-xs text-slate-600 transition hover:text-slate-950"
-                                >
-                                    Ouvrir
-                                </a>
-                            </div>
-
-                            <div class="relative min-h-[280px] flex-1">
-                                <iframe
-                                    v-if="settings.map_embed_url"
-                                    class="absolute inset-0 h-full w-full"
-                                    :title="`Carte – ${settings.map_place_label || settings.venue_room_title || ''}`"
-                                    loading="lazy"
-                                    referrerpolicy="no-referrer-when-downgrade"
-                                    :src="settings.map_embed_url"
-                                />
-                                <div
-                                    v-else
-                                    class="flex h-full min-h-[280px] items-center justify-center p-6 text-sm text-slate-600"
-                                >
-                                    Carte à venir.
-                                </div>
-                                <div
-                                    class="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(247,244,238,0.40),transparent_65%)]"
-                                    aria-hidden="true"
-                                />
-                            </div>
-
-                            <div class="px-5 py-4 text-sm text-slate-700">
-                                <div>
-                                    <span class="font-semibold text-slate-950">Adresse:</span>
-                                    <span class="whitespace-pre-line">{{ settings.map_address || '—' }}</span>
-                                </div>
-                                <div class="mt-2">
-                                    <span class="font-semibold text-slate-950">Accès:</span>
-                                    <span class="whitespace-pre-line">{{ settings.access_text || '—' }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-6 rounded-2xl border border-slate-900/10 bg-white/55 p-6 shadow-sm">
-                    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                        <div>
-                            <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">
-                                Timeline
-                            </div>
-                            <div class="mt-2 text-sm text-slate-700">
-                                Une lecture rapide de la soirée.
-                            </div>
-                        </div>
-                        <div class="text-xs text-slate-600">
-                            Merci d'arriver 20 minutes avant le début.
-                        </div>
-                    </div>
-
-                    <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                        <template v-if="settings.timeline && settings.timeline.length">
-                            <div
-                                v-for="(item, idx) in settings.timeline"
-                                :key="idx"
-                                class="rounded-xl border border-slate-900/10 bg-white/60 p-4"
-                            >
-                                <div class="flex items-center justify-between gap-3">
-                                    <div class="text-xs text-slate-600">{{ item.label || '—' }}</div>
-                                    <div class="h-2 w-2 rounded-full bg-slate-900/15" aria-hidden="true" />
-                                </div>
-                                <div class="mt-2 text-lg font-semibold text-slate-950">{{ item.time || '' }}</div>
-                                <div class="mt-1 text-xs text-slate-600">{{ item.description || '' }}</div>
-                            </div>
-                        </template>
-
-                        <div
-                            v-else
-                            class="rounded-xl border border-slate-900/10 bg-white/60 p-4 text-sm text-slate-600 sm:col-span-2 lg:col-span-4"
-                        >
-                            Timeline à venir.
-                        </div>
-                    </div>
-                </div>
-
-                <div v-if="practicalModalities.length" class="mx-auto mt-16 max-w-7xl px-6 lg:px-8">
-                    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                        <div>
-                            <div class="text-[11px] uppercase tracking-[0.24em] text-slate-600">
-                                Modalités pratiques
-                            </div>
-                            <div class="mt-2 text-sm text-slate-700">
-                                Informations utiles pour votre venue.
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        <div
-                            v-for="modality in practicalModalities"
-                            :key="modality.id"
-                            class="rounded-xl border border-slate-900/10 bg-white/60 p-6"
-                        >
-                            <div class="flex items-start gap-4">
-                                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-slate-100">
-                                    <component :is="getIconComponent(modality.icon_name)" class="h-6 w-6 text-slate-700" />
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <h3 class="break-words font-semibold leading-snug text-slate-900">{{ modality.title }}</h3>
-                                    <p class="mt-1 break-words whitespace-pre-line text-sm leading-relaxed text-slate-600 [overflow-wrap:anywhere]">{{ modality.description }}</p>
-                                </div>
                             </div>
                         </div>
                     </div>

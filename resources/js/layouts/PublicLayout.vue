@@ -63,10 +63,15 @@ function closeMobileMenu() {
                 <div class="flex min-w-0 items-center gap-3">
                     <Link
                         href="/"
-                        class="truncate text-base font-semibold tracking-tight text-foreground"
-                        style="font-family: 'Playfair Display', ui-serif, Georgia, serif;"
+                        class="inline-flex items-center"
                     >
-                        {{ appName }}
+                        <img
+                            src="/storage/navbar-logo.png"
+                            :alt="String(appName || '')"
+                            class="h-10 w-auto"
+                            loading="eager"
+                        />
+                        <span class="sr-only">{{ appName }}</span>
                     </Link>
                 </div>
 

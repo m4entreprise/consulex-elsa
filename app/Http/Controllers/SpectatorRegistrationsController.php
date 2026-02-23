@@ -13,6 +13,14 @@ class SpectatorRegistrationsController extends Controller
 {
     public function store(): RedirectResponse
     {
+        $currentSettings = EventSetting::current();
+
+        if ($currentSettings->spectator_custom_form_enabled && ! empty($currentSettings->spectator_custom_form_url)) {
+            throw ValidationException::withMessages([
+                'first_name' => "Les inscriptions spectateurs se font via un formulaire externe.",
+            ]);
+        }
+
         $validated = request()->validate([
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
@@ -30,7 +38,7 @@ class SpectatorRegistrationsController extends Controller
             'accepted_rules' => ['accepted'],
         ]);
 
-        if (! EventSetting::current()->spectator_registrations_enabled) {
+        if (! $currentSettings->spectator_registrations_enabled) {
             throw ValidationException::withMessages([
                 'first_name' => "Les inscriptions spectateurs sont clôturées.",
             ]);

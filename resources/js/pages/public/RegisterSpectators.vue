@@ -17,6 +17,8 @@ import { Info } from 'lucide-vue-next';
 type Settings = {
     spectator_capacity: number;
     spectator_registrations_enabled: boolean;
+    candidate_custom_form_enabled?: boolean;
+    candidate_custom_form_url?: string | null;
     privacy_policy_url: string | null;
     rules_url: string | null;
     event_title?: string | null;
@@ -47,6 +49,16 @@ const props = defineProps<{
 }>();
 
 const isClosed = computed(() => !props.settings.spectator_registrations_enabled || props.seatsRemaining === 0);
+
+const candidateRegistrationUrl = computed(() => {
+    const s = props.settings as any;
+    if (s?.candidate_custom_form_enabled && s?.candidate_custom_form_url) {
+        return String(s.candidate_custom_form_url);
+    }
+    return '/inscription/candidats';
+});
+
+const candidateRegistrationIsExternal = computed(() => candidateRegistrationUrl.value.startsWith('http'));
 
 const timelineSteps = computed(() => {
     if (!Array.isArray(props.settings.timeline)) return [];
@@ -276,7 +288,18 @@ function decrementFood(id: number) {
 
                         <div class="mt-6 text-sm text-slate-600">
                             Tu préfères candidater ?
-                            <Link href="/inscription/candidats" class="text-slate-700 underline underline-offset-4 hover:text-slate-950">
+                            <a
+                                v-if="candidateRegistrationIsExternal"
+                                :href="candidateRegistrationUrl"
+                                class="text-slate-700 underline underline-offset-4 hover:text-slate-950"
+                            >
+                                Inscription candidats
+                            </a>
+                            <Link
+                                v-else
+                                :href="candidateRegistrationUrl"
+                                class="text-slate-700 underline underline-offset-4 hover:text-slate-950"
+                            >
                                 Inscription candidats
                             </Link>
                         </div>

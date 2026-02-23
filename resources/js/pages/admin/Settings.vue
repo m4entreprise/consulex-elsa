@@ -39,8 +39,12 @@ type Settings = {
     candidate_capacity: number;
     spectator_registrations_enabled: boolean;
     spectator_registrations_end_at: string | null;
+    spectator_custom_form_enabled: boolean;
+    spectator_custom_form_url: string | null;
     candidate_registrations_enabled: boolean;
     candidate_registrations_end_at: string | null;
+    candidate_custom_form_enabled: boolean;
+    candidate_custom_form_url: string | null;
 };
 
 type TimelineItem = {
@@ -72,8 +76,26 @@ function toDatetimeLocalValue(value: string | null) {
 const spectatorRegistrationsEnabled = ref<boolean>(Boolean(props.settings.spectator_registrations_enabled));
 const candidateRegistrationsEnabled = ref<boolean>(Boolean(props.settings.candidate_registrations_enabled));
 
+const spectatorCustomFormEnabled = ref<boolean>(Boolean(props.settings.spectator_custom_form_enabled));
+const candidateCustomFormEnabled = ref<boolean>(Boolean(props.settings.candidate_custom_form_enabled));
+
 const spectatorRegistrationsEndAt = ref<string>(toDatetimeLocalValue(props.settings.spectator_registrations_end_at));
 const candidateRegistrationsEndAt = ref<string>(toDatetimeLocalValue(props.settings.candidate_registrations_end_at));
+
+const spectatorCustomFormUrl = ref<string>(props.settings.spectator_custom_form_url || '');
+const candidateCustomFormUrl = ref<string>(props.settings.candidate_custom_form_url || '');
+
+watch(spectatorCustomFormEnabled, (enabled) => {
+    if (!enabled) {
+        spectatorCustomFormUrl.value = '';
+    }
+});
+
+watch(candidateCustomFormEnabled, (enabled) => {
+    if (!enabled) {
+        candidateCustomFormUrl.value = '';
+    }
+});
 
 watch(spectatorRegistrationsEnabled, (enabled) => {
     if (enabled) {
@@ -439,6 +461,29 @@ const timelineJson = computed(() => {
                                 <span>Inscriptions spectateurs ouvertes</span>
                             </label>
 
+                            <div class="grid gap-2">
+                                <label class="flex items-center gap-3 text-sm">
+                                    <input
+                                        type="checkbox"
+                                        name="spectator_custom_form_enabled"
+                                        class="size-4"
+                                        v-model="spectatorCustomFormEnabled"
+                                    />
+                                    <span>Utiliser un formulaire personnalisé (spectateurs)</span>
+                                </label>
+
+                                <div v-if="spectatorCustomFormEnabled" class="grid gap-2">
+                                    <Label for="spectator_custom_form_url">Lien formulaire spectateurs</Label>
+                                    <Input
+                                        id="spectator_custom_form_url"
+                                        name="spectator_custom_form_url"
+                                        v-model="spectatorCustomFormUrl"
+                                        placeholder="https://..."
+                                    />
+                                    <InputError :message="errors.spectator_custom_form_url" />
+                                </div>
+                            </div>
+
                             <label class="flex items-center gap-3 text-sm">
                                 <input
                                     type="checkbox"
@@ -448,6 +493,29 @@ const timelineJson = computed(() => {
                                 />
                                 <span>Inscriptions candidats ouvertes</span>
                             </label>
+
+                            <div class="grid gap-2">
+                                <label class="flex items-center gap-3 text-sm">
+                                    <input
+                                        type="checkbox"
+                                        name="candidate_custom_form_enabled"
+                                        class="size-4"
+                                        v-model="candidateCustomFormEnabled"
+                                    />
+                                    <span>Utiliser un formulaire personnalisé (candidats)</span>
+                                </label>
+
+                                <div v-if="candidateCustomFormEnabled" class="grid gap-2">
+                                    <Label for="candidate_custom_form_url">Lien formulaire candidats</Label>
+                                    <Input
+                                        id="candidate_custom_form_url"
+                                        name="candidate_custom_form_url"
+                                        v-model="candidateCustomFormUrl"
+                                        placeholder="https://..."
+                                    />
+                                    <InputError :message="errors.candidate_custom_form_url" />
+                                </div>
+                            </div>
                         </div>
                         </div>
                         </div>

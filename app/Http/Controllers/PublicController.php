@@ -100,9 +100,13 @@ class PublicController extends Controller
         ]);
     }
 
-    public function spectators(): Response
+    public function spectators(): RedirectResponse|Response
     {
         $settings = EventSetting::current();
+
+        if ($settings->spectator_custom_form_enabled && ! empty($settings->spectator_custom_form_url)) {
+            return redirect()->to($settings->spectator_custom_form_url);
+        }
 
         $foodOptions = FoodOption::query()
             ->where('is_active', true)
@@ -124,9 +128,13 @@ class PublicController extends Controller
         ]);
     }
 
-    public function candidates(): Response
+    public function candidates(): RedirectResponse|Response
     {
         $settings = EventSetting::current();
+
+        if ($settings->candidate_custom_form_enabled && ! empty($settings->candidate_custom_form_url)) {
+            return redirect()->to($settings->candidate_custom_form_url);
+        }
 
         $candidatesUsed = (int) CandidateRegistration::query()->count();
         $candidatesRemaining = max(0, (int) $settings->candidate_capacity - $candidatesUsed);

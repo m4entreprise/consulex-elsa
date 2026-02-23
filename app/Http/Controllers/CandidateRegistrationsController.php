@@ -14,6 +14,14 @@ class CandidateRegistrationsController extends Controller
 {
     public function store(): RedirectResponse
     {
+        $currentSettings = EventSetting::current();
+
+        if ($currentSettings->candidate_custom_form_enabled && ! empty($currentSettings->candidate_custom_form_url)) {
+            throw ValidationException::withMessages([
+                'first_name' => "Les inscriptions candidats se font via un formulaire externe.",
+            ]);
+        }
+
         $faculties = [
             'Faculté de Philosophie et Lettres',
             'Faculté de Droit, Science politique et Criminologie',
@@ -54,7 +62,7 @@ class CandidateRegistrationsController extends Controller
             'accepted_rules' => ['accepted'],
         ]);
 
-        if (! EventSetting::current()->candidate_registrations_enabled) {
+        if (! $currentSettings->candidate_registrations_enabled) {
             throw ValidationException::withMessages([
                 'first_name' => "Les inscriptions candidats sont clôturées.",
             ]);

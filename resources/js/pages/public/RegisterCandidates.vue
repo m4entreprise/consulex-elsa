@@ -10,6 +10,8 @@ import PublicLayout from '@/layouts/PublicLayout.vue';
 type Settings = {
     candidate_capacity: number;
     candidate_registrations_enabled: boolean;
+    spectator_custom_form_enabled?: boolean;
+    spectator_custom_form_url?: string | null;
     privacy_policy_url: string | null;
     rules_url: string | null;
     event_title?: string | null;
@@ -34,6 +36,16 @@ const props = defineProps<{
 }>();
 
 const isClosed = computed(() => !props.settings.candidate_registrations_enabled || props.candidatesRemaining === 0);
+
+const spectatorRegistrationUrl = computed(() => {
+    const s = props.settings as any;
+    if (s?.spectator_custom_form_enabled && s?.spectator_custom_form_url) {
+        return String(s.spectator_custom_form_url);
+    }
+    return '/inscription/spectateurs';
+});
+
+const spectatorRegistrationIsExternal = computed(() => spectatorRegistrationUrl.value.startsWith('http'));
 
 const faculties = [
     'Faculté de Philosophie et Lettres',
@@ -190,7 +202,18 @@ const timelineSteps = computed(() => {
 
                         <div class="mt-6 text-sm text-slate-600">
                             Tu veux juste assister ?
-                            <Link href="/inscription/spectateurs" class="text-slate-700 underline underline-offset-4 hover:text-slate-950">
+                            <a
+                                v-if="spectatorRegistrationIsExternal"
+                                :href="spectatorRegistrationUrl"
+                                class="text-slate-700 underline underline-offset-4 hover:text-slate-950"
+                            >
+                                Inscription spectateurs
+                            </a>
+                            <Link
+                                v-else
+                                :href="spectatorRegistrationUrl"
+                                class="text-slate-700 underline underline-offset-4 hover:text-slate-950"
+                            >
                                 Inscription spectateurs
                             </Link>
                         </div>

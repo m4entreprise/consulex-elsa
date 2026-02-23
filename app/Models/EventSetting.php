@@ -35,8 +35,12 @@ class EventSetting extends Model
         'candidate_capacity',
         'spectator_registrations_enabled',
         'spectator_registrations_end_at',
+        'spectator_custom_form_enabled',
+        'spectator_custom_form_url',
         'candidate_registrations_enabled',
         'candidate_registrations_end_at',
+        'candidate_custom_form_enabled',
+        'candidate_custom_form_url',
     ];
 
     protected $casts = [
@@ -45,8 +49,12 @@ class EventSetting extends Model
         'candidate_capacity' => 'integer',
         'spectator_registrations_enabled' => 'boolean',
         'spectator_registrations_end_at' => 'datetime',
+        'spectator_custom_form_enabled' => 'boolean',
+        'spectator_custom_form_url' => 'string',
         'candidate_registrations_enabled' => 'boolean',
         'candidate_registrations_end_at' => 'datetime',
+        'candidate_custom_form_enabled' => 'boolean',
+        'candidate_custom_form_url' => 'string',
         'timeline' => 'array',
     ];
 

@@ -53,8 +53,12 @@ class EventSettingsController extends Controller
             'candidate_capacity' => ['required', 'integer', 'min:0', 'max:100000'],
             'spectator_registrations_enabled' => ['nullable'],
             'spectator_registrations_end_at' => ['nullable', 'string', 'max:255'],
+            'spectator_custom_form_enabled' => ['nullable'],
+            'spectator_custom_form_url' => ['nullable', 'url', 'max:2000'],
             'candidate_registrations_enabled' => ['nullable'],
             'candidate_registrations_end_at' => ['nullable', 'string', 'max:255'],
+            'candidate_custom_form_enabled' => ['nullable'],
+            'candidate_custom_form_url' => ['nullable', 'url', 'max:2000'],
         ]);
 
         $data = Arr::except($validated, ['privacy_policy_pdf', 'rules_pdf', 'timeline_json']);
@@ -100,16 +104,39 @@ class EventSettingsController extends Controller
         $spectatorEnabled = (bool) request()->boolean('spectator_registrations_enabled');
         $candidateEnabled = (bool) request()->boolean('candidate_registrations_enabled');
 
+        $spectatorCustomFormEnabled = (bool) request()->boolean('spectator_custom_form_enabled');
+        $candidateCustomFormEnabled = (bool) request()->boolean('candidate_custom_form_enabled');
+
+        if ($spectatorCustomFormEnabled && empty($validated['spectator_custom_form_url'])) {
+            throw ValidationException::withMessages([
+                'spectator_custom_form_url' => 'URL requise.',
+            ]);
+        }
+
+        if ($candidateCustomFormEnabled && empty($validated['candidate_custom_form_url'])) {
+            throw ValidationException::withMessages([
+                'candidate_custom_form_url' => 'URL requise.',
+            ]);
+        }
+
         $fill = [
             ...$data,
             'spectator_registrations_enabled' => $spectatorEnabled,
             'spectator_registrations_end_at' => $spectatorEnabled
                 ? null
                 : $this->parseNullableLocalDatetime('spectator_registrations_end_at', $validated['spectator_registrations_end_at'] ?? null),
+            'spectator_custom_form_enabled' => $spectatorCustomFormEnabled,
+            'spectator_custom_form_url' => $spectatorCustomFormEnabled
+                ? ($validated['spectator_custom_form_url'] ?? null)
+                : null,
             'candidate_registrations_enabled' => $candidateEnabled,
             'candidate_registrations_end_at' => $candidateEnabled
                 ? null
                 : $this->parseNullableLocalDatetime('candidate_registrations_end_at', $validated['candidate_registrations_end_at'] ?? null),
+            'candidate_custom_form_enabled' => $candidateCustomFormEnabled,
+            'candidate_custom_form_url' => $candidateCustomFormEnabled
+                ? ($validated['candidate_custom_form_url'] ?? null)
+                : null,
         ];
 
         if (array_key_exists('timeline_json', $validated)) {

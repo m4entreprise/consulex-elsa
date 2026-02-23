@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import type { ComponentPublicInstance, VNodeRef } from 'vue';
-import { onMounted, onBeforeUnmount, ref } from 'vue';
+import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
 
 type Props = {
     date?: string | null;
@@ -22,6 +22,28 @@ const props = withDefaults(defineProps<Props>(), {
     backgroundImageUrl: null,
     backgroundImageAlt: 'Fond du concours',
 });
+
+const page = usePage();
+const settings = computed(() => (page.props as any)?.settings ?? null);
+
+const spectatorRegistrationUrl = computed(() => {
+    const s = settings.value as any;
+    if (s?.spectator_custom_form_enabled && s?.spectator_custom_form_url) {
+        return String(s.spectator_custom_form_url);
+    }
+    return '/inscription/spectateurs';
+});
+
+const candidateRegistrationUrl = computed(() => {
+    const s = settings.value as any;
+    if (s?.candidate_custom_form_enabled && s?.candidate_custom_form_url) {
+        return String(s.candidate_custom_form_url);
+    }
+    return '/inscription/candidats';
+});
+
+const spectatorRegistrationIsExternal = computed(() => spectatorRegistrationUrl.value.startsWith('http'));
+const candidateRegistrationIsExternal = computed(() => candidateRegistrationUrl.value.startsWith('http'));
 
 const titleEl = ref<HTMLElement | null>(null);
 const metaEl = ref<HTMLElement | null>(null);
@@ -271,9 +293,26 @@ onBeforeUnmount(() => {
                     </div>
 
                     <div ref="ctasEl" class="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-                        <Link
+                        <a
+                            v-if="candidateRegistrationIsExternal"
                             :ref="setMagneticEl"
-                            href="/inscription/candidats"
+                            :href="candidateRegistrationUrl"
+                            class="group relative inline-flex h-12 w-full items-center justify-center rounded-full px-6 text-sm font-semibold tracking-wide text-[#f7f4ee] transition will-change-transform sm:w-auto"
+                        >
+                            <span
+                                class="absolute inset-0 rounded-full bg-slate-950 transition group-hover:bg-slate-900"
+                                aria-hidden="true"
+                            />
+                            <span
+                                class="absolute inset-0 rounded-full shadow-[0_0_0_1px_rgba(15,23,42,0.18),0_18px_40px_rgba(15,23,42,0.14)]"
+                                aria-hidden="true"
+                            />
+                            <span class="relative">Candidater</span>
+                        </a>
+                        <Link
+                            v-else
+                            :ref="setMagneticEl"
+                            :href="candidateRegistrationUrl"
                             class="group relative inline-flex h-12 w-full items-center justify-center rounded-full px-6 text-sm font-semibold tracking-wide text-[#f7f4ee] transition will-change-transform sm:w-auto"
                         >
                             <span
@@ -287,9 +326,26 @@ onBeforeUnmount(() => {
                             <span class="relative">Candidater</span>
                         </Link>
 
-                        <Link
+                        <a
+                            v-if="spectatorRegistrationIsExternal"
                             :ref="setMagneticEl"
-                            href="/inscription/spectateurs"
+                            :href="spectatorRegistrationUrl"
+                            class="group relative inline-flex h-12 w-full items-center justify-center overflow-hidden rounded-full border border-slate-900/20 bg-white/0 px-6 text-sm font-semibold tracking-wide text-slate-950 transition will-change-transform hover:border-slate-900/35 sm:w-auto"
+                        >
+                            <span
+                                class="pointer-events-none absolute inset-0 origin-left scale-x-0 bg-slate-900/5 transition duration-500 group-hover:scale-x-100"
+                                aria-hidden="true"
+                            />
+                            <span
+                                class="pointer-events-none absolute inset-0 rounded-full shadow-[0_0_0_1px_rgba(15,23,42,0.06)]"
+                                aria-hidden="true"
+                            />
+                            <span class="relative">Assister</span>
+                        </a>
+                        <Link
+                            v-else
+                            :ref="setMagneticEl"
+                            :href="spectatorRegistrationUrl"
                             class="group relative inline-flex h-12 w-full items-center justify-center overflow-hidden rounded-full border border-slate-900/20 bg-white/0 px-6 text-sm font-semibold tracking-wide text-slate-950 transition will-change-transform hover:border-slate-900/35 sm:w-auto"
                         >
                             <span

@@ -20,6 +20,24 @@ const settings = computed(() => (page.props as any)?.settings ?? null);
 const instagramUrl = computed(() => (settings.value as any)?.instagram_url ?? null);
 const privacyPolicyUrl = computed(() => (settings.value as any)?.privacy_policy_url ?? null);
 const rulesUrl = computed(() => (settings.value as any)?.rules_url ?? null);
+const spectatorRegistrationUrl = computed(() => {
+    const s = settings.value as any;
+    if (s?.spectator_custom_form_enabled && s?.spectator_custom_form_url) {
+        return String(s.spectator_custom_form_url);
+    }
+    return '/inscription/spectateurs';
+});
+
+const candidateRegistrationUrl = computed(() => {
+    const s = settings.value as any;
+    if (s?.candidate_custom_form_enabled && s?.candidate_custom_form_url) {
+        return String(s.candidate_custom_form_url);
+    }
+    return '/inscription/candidats';
+});
+
+const spectatorRegistrationIsExternal = computed(() => spectatorRegistrationUrl.value.startsWith('http'));
+const candidateRegistrationIsExternal = computed(() => candidateRegistrationUrl.value.startsWith('http'));
 const footerBrand = computed(() => (settings.value as any)?.footer_brand || appName.value);
 const footerDescription = computed(() => (settings.value as any)?.footer_description || '');
 const footerCopyright = computed(() => (settings.value as any)?.footer_copyright || `© ${new Date().getFullYear()}`);
@@ -28,7 +46,7 @@ const hasFlash = computed(() => Boolean((page.props as any)?.flash?.success || (
 const { isCurrentUrl } = useCurrentUrl();
 const mobileMenuOpen = ref(false);
 
-const navItems = [
+const navItems = computed(() => [
     {
         label: 'Accueil',
         href: '/',
@@ -39,9 +57,9 @@ const navItems = [
     },
     {
         label: 'Spectateurs',
-        href: '/inscription/spectateurs',
+        href: spectatorRegistrationUrl.value,
     },
-];
+]);
 
 function closeMobileMenu() {
     mobileMenuOpen.value = false;
@@ -76,22 +94,38 @@ function closeMobileMenu() {
                 </div>
 
                 <nav class="hidden items-center gap-1 text-sm md:flex">
-                    <Link
-                        v-for="item in navItems"
-                        :key="item.href"
-                        :href="item.href"
-                        class="rounded-full px-4 py-2 font-medium transition"
-                        :class="
-                            isCurrentUrl(item.href)
-                                ? 'bg-muted text-foreground shadow-sm'
-                                : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
-                        "
-                    >
-                        {{ item.label }}
-                    </Link>
+                    <template v-for="item in navItems" :key="item.href">
+                        <a
+                            v-if="item.href.startsWith('http')"
+                            :href="item.href"
+                            class="rounded-full px-4 py-2 font-medium transition text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                        >
+                            {{ item.label }}
+                        </a>
+                        <Link
+                            v-else
+                            :href="item.href"
+                            class="rounded-full px-4 py-2 font-medium transition"
+                            :class="
+                                isCurrentUrl(item.href)
+                                    ? 'bg-muted text-foreground shadow-sm'
+                                    : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+                            "
+                        >
+                            {{ item.label }}
+                        </Link>
+                    </template>
 
+                    <a
+                        v-if="candidateRegistrationIsExternal"
+                        :href="candidateRegistrationUrl"
+                        class="ml-2 rounded-full bg-primary px-4 py-2 font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 hover:bg-primary/90"
+                    >
+                        Candidats
+                    </a>
                     <Link
-                        href="/inscription/candidats"
+                        v-else
+                        :href="candidateRegistrationUrl"
                         class="ml-2 rounded-full bg-primary px-4 py-2 font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 hover:bg-primary/90"
                         :class="isCurrentUrl('/inscription/candidats') ? 'ring-2 ring-primary/30 ring-offset-2 ring-offset-background' : ''"
                     >
@@ -114,22 +148,40 @@ function closeMobileMenu() {
             <div v-if="mobileMenuOpen" class="border-t border-border/60 bg-background/80 backdrop-blur md:hidden">
                 <div class="mx-auto max-w-7xl px-4 py-4">
                     <nav class="grid gap-1 text-sm">
-                        <Link
-                            v-for="item in navItems"
-                            :key="item.href"
-                            :href="item.href"
-                            class="rounded-xl px-4 py-3 font-medium transition"
-                            :class="
-                                isCurrentUrl(item.href)
-                                    ? 'bg-muted text-foreground'
-                                    : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
-                            "
+                        <template v-for="item in navItems" :key="item.href">
+                            <a
+                                v-if="item.href.startsWith('http')"
+                                :href="item.href"
+                                class="rounded-xl px-4 py-3 font-medium transition text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                                @click="closeMobileMenu"
+                            >
+                                {{ item.label }}
+                            </a>
+                            <Link
+                                v-else
+                                :href="item.href"
+                                class="rounded-xl px-4 py-3 font-medium transition"
+                                :class="
+                                    isCurrentUrl(item.href)
+                                        ? 'bg-muted text-foreground'
+                                        : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+                                "
+                                @click="closeMobileMenu"
+                            >
+                                {{ item.label }}
+                            </Link>
+                        </template>
+                        <a
+                            v-if="candidateRegistrationIsExternal"
+                            :href="candidateRegistrationUrl"
+                            class="mt-2 rounded-xl bg-primary px-4 py-3 text-center font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 hover:bg-primary/90"
                             @click="closeMobileMenu"
                         >
-                            {{ item.label }}
-                        </Link>
+                            Candidats
+                        </a>
                         <Link
-                            href="/inscription/candidats"
+                            v-else
+                            :href="candidateRegistrationUrl"
                             class="mt-2 rounded-xl bg-primary px-4 py-3 text-center font-semibold text-primary-foreground shadow-sm ring-1 ring-primary/20 hover:bg-primary/90"
                             @click="closeMobileMenu"
                         >
@@ -177,8 +229,23 @@ function closeMobileMenu() {
                         <div class="mt-3 grid gap-2 text-sm">
                             <Link href="/" class="text-muted-foreground hover:text-foreground">Accueil</Link>
                             <Link href="/partenaires" class="text-muted-foreground hover:text-foreground">Partenaires</Link>
-                            <Link href="/inscription/spectateurs" class="text-muted-foreground hover:text-foreground">Spectateurs</Link>
-                            <Link href="/inscription/candidats" class="text-muted-foreground hover:text-foreground">Candidats</Link>
+                            <a
+                                v-if="spectatorRegistrationIsExternal"
+                                :href="spectatorRegistrationUrl"
+                                class="text-muted-foreground hover:text-foreground"
+                            >
+                                Spectateurs
+                            </a>
+                            <Link v-else href="/inscription/spectateurs" class="text-muted-foreground hover:text-foreground">Spectateurs</Link>
+
+                            <a
+                                v-if="candidateRegistrationIsExternal"
+                                :href="candidateRegistrationUrl"
+                                class="text-muted-foreground hover:text-foreground"
+                            >
+                                Candidats
+                            </a>
+                            <Link v-else href="/inscription/candidats" class="text-muted-foreground hover:text-foreground">Candidats</Link>
                         </div>
                     </div>
 

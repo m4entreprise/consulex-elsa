@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\EventSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -17,8 +18,12 @@ class EventSettingsController extends Controller
     {
         $settings = EventSetting::current();
 
+        $settingsPayload = $settings->toArray();
+        $settingsPayload['spectator_registrations_enabled'] = (bool) $settings->getRawOriginal('spectator_registrations_enabled');
+        $settingsPayload['candidate_registrations_enabled'] = (bool) $settings->getRawOriginal('candidate_registrations_enabled');
+
         return Inertia::render('admin/Settings', [
-            'settings' => $settings,
+            'settings' => $settingsPayload,
         ]);
     }
 
@@ -51,7 +56,9 @@ class EventSettingsController extends Controller
             'spectator_capacity' => ['required', 'integer', 'min:0', 'max:100000'],
             'candidate_capacity' => ['required', 'integer', 'min:0', 'max:100000'],
             'spectator_registrations_enabled' => ['nullable'],
+            'spectator_registrations_end_at' => ['nullable', 'string', 'max:255'],
             'candidate_registrations_enabled' => ['nullable'],
+            'candidate_registrations_end_at' => ['nullable', 'string', 'max:255'],
         ]);
 
         $data = Arr::except($validated, ['privacy_policy_pdf', 'rules_pdf', 'timeline_json']);
@@ -97,7 +104,9 @@ class EventSettingsController extends Controller
         $fill = [
             ...$data,
             'spectator_registrations_enabled' => (bool) request()->boolean('spectator_registrations_enabled'),
+            'spectator_registrations_end_at' => $this->parseNullableLocalDatetime('spectator_registrations_end_at', $validated['spectator_registrations_end_at'] ?? null),
             'candidate_registrations_enabled' => (bool) request()->boolean('candidate_registrations_enabled'),
+            'candidate_registrations_end_at' => $this->parseNullableLocalDatetime('candidate_registrations_end_at', $validated['candidate_registrations_end_at'] ?? null),
         ];
 
         if (array_key_exists('timeline_json', $validated)) {
@@ -109,6 +118,23 @@ class EventSettingsController extends Controller
         $settings->save();
 
         return back()->with('success', 'Paramètres mis à jour.');
+    }
+
+    private function parseNullableLocalDatetime(string $field, ?string $value): ?Carbon
+    {
+        $raw = trim((string) ($value ?? ''));
+
+        if ($raw === '') {
+            return null;
+        }
+
+        try {
+            return Carbon::parse($raw);
+        } catch (\Throwable) {
+            throw ValidationException::withMessages([
+                $field => 'Date/heure invalide.',
+            ]);
+        }
     }
 
     private function isExternalUrl(string $value): bool

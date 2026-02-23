@@ -38,7 +38,9 @@ type Settings = {
     spectator_capacity: number;
     candidate_capacity: number;
     spectator_registrations_enabled: boolean;
+    spectator_registrations_end_at: string | null;
     candidate_registrations_enabled: boolean;
+    candidate_registrations_end_at: string | null;
 };
 
 type TimelineItem = {
@@ -49,6 +51,23 @@ type TimelineItem = {
 };
 
 const props = defineProps<{ settings: Settings }>();
+
+function toDatetimeLocalValue(value: string | null) {
+    if (!value) return '';
+    let d = new Date(value);
+    if (Number.isNaN(d.getTime()) && value.includes(' ')) {
+        d = new Date(value.replace(' ', 'T'));
+    }
+    if (Number.isNaN(d.getTime())) return '';
+
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    const mm = pad(d.getMonth() + 1);
+    const dd = pad(d.getDate());
+    const hh = pad(d.getHours());
+    const min = pad(d.getMinutes());
+    return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+}
 
 function newTimelineUid() {
     return `${Math.random().toString(36).slice(2)}-${Date.now().toString(36)}`;
@@ -362,6 +381,30 @@ const timelineJson = computed(() => {
                                 <Label for="candidate_capacity">Quota candidats</Label>
                                 <Input id="candidate_capacity" name="candidate_capacity" type="number" min="0" :default-value="settings.candidate_capacity" />
                                 <InputError :message="errors.candidate_capacity" />
+                            </div>
+                        </div>
+
+                        <div class="grid gap-2 sm:grid-cols-2">
+                            <div class="grid gap-2">
+                                <Label for="spectator_registrations_end_at">Fin inscriptions spectateurs</Label>
+                                <Input
+                                    id="spectator_registrations_end_at"
+                                    name="spectator_registrations_end_at"
+                                    type="datetime-local"
+                                    :default-value="toDatetimeLocalValue(settings.spectator_registrations_end_at)"
+                                />
+                                <InputError :message="errors.spectator_registrations_end_at" />
+                            </div>
+
+                            <div class="grid gap-2">
+                                <Label for="candidate_registrations_end_at">Fin inscriptions candidats</Label>
+                                <Input
+                                    id="candidate_registrations_end_at"
+                                    name="candidate_registrations_end_at"
+                                    type="datetime-local"
+                                    :default-value="toDatetimeLocalValue(settings.candidate_registrations_end_at)"
+                                />
+                                <InputError :message="errors.candidate_registrations_end_at" />
                             </div>
                         </div>
 

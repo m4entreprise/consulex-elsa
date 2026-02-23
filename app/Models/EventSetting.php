@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 class EventSetting extends Model
@@ -33,7 +34,9 @@ class EventSetting extends Model
         'spectator_capacity',
         'candidate_capacity',
         'spectator_registrations_enabled',
+        'spectator_registrations_end_at',
         'candidate_registrations_enabled',
+        'candidate_registrations_end_at',
     ];
 
     protected $casts = [
@@ -41,13 +44,49 @@ class EventSetting extends Model
         'spectator_capacity' => 'integer',
         'candidate_capacity' => 'integer',
         'spectator_registrations_enabled' => 'boolean',
+        'spectator_registrations_end_at' => 'datetime',
         'candidate_registrations_enabled' => 'boolean',
+        'candidate_registrations_end_at' => 'datetime',
         'timeline' => 'array',
     ];
 
     public static function current(): self
     {
         return static::query()->firstOrCreate(['key' => 'default']);
+    }
+
+    public function getSpectatorRegistrationsEnabledAttribute(mixed $value): bool
+    {
+        $enabled = (bool) $value;
+
+        if (! $enabled) {
+            return false;
+        }
+
+        $endAt = $this->spectator_registrations_end_at;
+
+        if ($endAt instanceof Carbon && now()->greaterThanOrEqualTo($endAt)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function getCandidateRegistrationsEnabledAttribute(mixed $value): bool
+    {
+        $enabled = (bool) $value;
+
+        if (! $enabled) {
+            return false;
+        }
+
+        $endAt = $this->candidate_registrations_end_at;
+
+        if ($endAt instanceof Carbon && now()->greaterThanOrEqualTo($endAt)) {
+            return false;
+        }
+
+        return true;
     }
 
     public function getPrivacyPolicyUrlAttribute(?string $value): ?string

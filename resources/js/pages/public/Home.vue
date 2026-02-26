@@ -299,7 +299,7 @@ onBeforeUnmount(() => {
                                             {{ settings.venue_room_title || '—' }}
                                         </div>
                                         <div class="mt-1 text-sm text-slate-700">
-                                            Galerie (fade) — {{ modPratActive + 1 }}/{{ modPratImages.length }}
+                                            Galerie — {{ modPratActive + 1 }}/{{ modPratImages.length }}
                                         </div>
                                     </div>
                                 </div>

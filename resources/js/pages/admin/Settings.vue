@@ -97,18 +97,6 @@ watch(candidateCustomFormEnabled, (enabled) => {
     }
 });
 
-watch(spectatorRegistrationsEnabled, (enabled) => {
-    if (enabled) {
-        spectatorRegistrationsEndAt.value = '';
-    }
-});
-
-watch(candidateRegistrationsEnabled, (enabled) => {
-    if (enabled) {
-        candidateRegistrationsEndAt.value = '';
-    }
-});
-
 function newTimelineUid() {
     return `${Math.random().toString(36).slice(2)}-${Date.now().toString(36)}`;
 }
@@ -432,7 +420,6 @@ const timelineJson = computed(() => {
                                     name="spectator_registrations_end_at"
                                     type="datetime-local"
                                     v-model="spectatorRegistrationsEndAt"
-                                    :disabled="spectatorRegistrationsEnabled"
                                 />
                                 <InputError :message="errors.spectator_registrations_end_at" />
                             </div>
@@ -444,7 +431,6 @@ const timelineJson = computed(() => {
                                     name="candidate_registrations_end_at"
                                     type="datetime-local"
                                     v-model="candidateRegistrationsEndAt"
-                                    :disabled="candidateRegistrationsEnabled"
                                 />
                                 <InputError :message="errors.candidate_registrations_end_at" />
                             </div>

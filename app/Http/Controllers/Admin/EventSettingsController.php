@@ -122,17 +122,13 @@ class EventSettingsController extends Controller
         $fill = [
             ...$data,
             'spectator_registrations_enabled' => $spectatorEnabled,
-            'spectator_registrations_end_at' => $spectatorEnabled
-                ? null
-                : $this->parseNullableLocalDatetime('spectator_registrations_end_at', $validated['spectator_registrations_end_at'] ?? null),
+            'spectator_registrations_end_at' => $this->parseNullableLocalDatetime('spectator_registrations_end_at', $validated['spectator_registrations_end_at'] ?? null),
             'spectator_custom_form_enabled' => $spectatorCustomFormEnabled,
             'spectator_custom_form_url' => $spectatorCustomFormEnabled
                 ? ($validated['spectator_custom_form_url'] ?? null)
                 : null,
             'candidate_registrations_enabled' => $candidateEnabled,
-            'candidate_registrations_end_at' => $candidateEnabled
-                ? null
-                : $this->parseNullableLocalDatetime('candidate_registrations_end_at', $validated['candidate_registrations_end_at'] ?? null),
+            'candidate_registrations_end_at' => $this->parseNullableLocalDatetime('candidate_registrations_end_at', $validated['candidate_registrations_end_at'] ?? null),
             'candidate_custom_form_enabled' => $candidateCustomFormEnabled,
             'candidate_custom_form_url' => $candidateCustomFormEnabled
                 ? ($validated['candidate_custom_form_url'] ?? null)

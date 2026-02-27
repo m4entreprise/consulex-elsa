@@ -76,4 +76,6 @@ Route::middleware(['auth', 'verified', 'can:admin'])->prefix('admin')->name('adm
     Route::delete('/registrations/candidates/{candidateRegistration}', [RegistrationsController::class, 'destroyCandidate'])->name('registrations.candidates.destroy');
 });
 
+Route::fallback(fn () => redirect()->route('home'));
+
 require __DIR__.'/settings.php';

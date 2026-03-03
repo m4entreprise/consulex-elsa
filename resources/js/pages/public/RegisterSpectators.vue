@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { Form, Link } from '@inertiajs/vue3';
+import { Form, Link, usePage } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import InputError from '@/components/InputError.vue';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -47,6 +48,9 @@ const props = defineProps<{
     seatsUsed: number;
     seatsRemaining: number;
 }>();
+
+const page = usePage();
+const flashSuccess = computed(() => (page.props as any)?.flash?.success);
 
 const isClosed = computed(() => !props.settings.spectator_registrations_enabled || props.seatsRemaining === 0);
 
@@ -321,6 +325,11 @@ function decrementFood(id: number) {
                                 >
                                     Les inscriptions spectateurs sont clôturées.
                                 </div>
+
+                                <Alert v-if="flashSuccess" class="mb-5 border-emerald-200 bg-emerald-50 text-emerald-900">
+                                    <AlertTitle>OK</AlertTitle>
+                                    <AlertDescription>{{ flashSuccess }}</AlertDescription>
+                                </Alert>
 
                                 <Form
                                     action="/inscription/spectateurs"

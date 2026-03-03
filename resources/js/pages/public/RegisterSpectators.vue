@@ -215,7 +215,7 @@ function decrementFood(id: number) {
                 class="fixed right-4 top-4 z-50 w-[min(24rem,calc(100vw-2rem))]"
             >
                 <Alert class="border-emerald-200 bg-emerald-50 text-emerald-900 shadow-lg">
-                    <AlertTitle>OK</AlertTitle>
+                    <AlertTitle>Notification</AlertTitle>
                     <AlertDescription>{{ toastMessage }}</AlertDescription>
                 </Alert>
             </div>

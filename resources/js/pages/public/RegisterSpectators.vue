@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Form, Link, usePage } from '@inertiajs/vue3';
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import InputError from '@/components/InputError.vue';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -51,6 +51,37 @@ const props = defineProps<{
 
 const page = usePage();
 const flashSuccess = computed(() => (page.props as any)?.flash?.success);
+
+const toastMessage = ref<string | null>(null);
+const toastVisible = ref(false);
+let toastTimeout: number | null = null;
+
+watch(
+    flashSuccess,
+    (message) => {
+        if (!message) return;
+
+        toastMessage.value = String(message);
+        toastVisible.value = true;
+
+        if (toastTimeout !== null) {
+            window.clearTimeout(toastTimeout);
+        }
+
+        toastTimeout = window.setTimeout(() => {
+            toastVisible.value = false;
+            toastTimeout = null;
+        }, 3500);
+    },
+    { flush: 'post' },
+);
+
+onBeforeUnmount(() => {
+    if (toastTimeout !== null) {
+        window.clearTimeout(toastTimeout);
+        toastTimeout = null;
+    }
+});
 
 const isClosed = computed(() => !props.settings.spectator_registrations_enabled || props.seatsRemaining === 0);
 
@@ -171,6 +202,25 @@ function decrementFood(id: number) {
 
 <template>
     <PublicLayout title="Inscription Spectateurs" :container="false">
+        <Transition
+            enter-active-class="transition duration-200 ease-out"
+            enter-from-class="opacity-0 -translate-y-1"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition duration-200 ease-in"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 -translate-y-1"
+        >
+            <div
+                v-if="toastVisible && toastMessage"
+                class="fixed right-4 top-4 z-50 w-[min(24rem,calc(100vw-2rem))]"
+            >
+                <Alert class="border-emerald-200 bg-emerald-50 text-emerald-900 shadow-lg">
+                    <AlertTitle>OK</AlertTitle>
+                    <AlertDescription>{{ toastMessage }}</AlertDescription>
+                </Alert>
+            </div>
+        </Transition>
+
         <section class="relative overflow-hidden bg-[#f7f4ee] py-16 sm:py-20 lg:py-24">
             <div class="absolute inset-0" aria-hidden="true">
                 <div class="absolute inset-0 bg-[radial-gradient(1200px_circle_at_18%_12%,rgba(15,23,42,0.06),transparent_58%),radial-gradient(900px_circle_at_88%_6%,rgba(180,83,9,0.08),transparent_62%)]" />
@@ -325,11 +375,6 @@ function decrementFood(id: number) {
                                 >
                                     Les inscriptions spectateurs sont clôturées.
                                 </div>
-
-                                <Alert v-if="flashSuccess" class="mb-5 border-emerald-200 bg-emerald-50 text-emerald-900">
-                                    <AlertTitle>OK</AlertTitle>
-                                    <AlertDescription>{{ flashSuccess }}</AlertDescription>
-                                </Alert>
 
                                 <Form
                                     action="/inscription/spectateurs"

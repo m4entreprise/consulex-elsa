@@ -8,10 +8,12 @@ import { useCurrentUrl } from '@/composables/useCurrentUrl';
 type Props = {
     title: string;
     container?: boolean;
+    showFlash?: boolean;
 };
 
 const props = withDefaults(defineProps<Props>(), {
     container: true,
+    showFlash: true,
 });
 
 const page = usePage();
@@ -193,12 +195,12 @@ function closeMobileMenu() {
         </header>
 
         <main v-if="props.container" class="mx-auto w-full max-w-7xl px-4 py-10">
-            <FlashMessages class="mb-6" />
+            <FlashMessages v-if="props.showFlash" class="mb-6" />
             <slot />
         </main>
 
         <main v-else class="w-full">
-            <div v-if="hasFlash" class="mx-auto w-full max-w-7xl px-4 pt-6">
+            <div v-if="props.showFlash && hasFlash" class="mx-auto w-full max-w-7xl px-4 pt-6">
                 <FlashMessages class="mb-6" />
             </div>
             <slot />
